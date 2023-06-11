@@ -63,9 +63,9 @@ import "primevue/resources/themes/lara-light-indigo/theme.css";
 const tableData = ref([]);
 /* const store = useFilesStore(); */
 
-const onUpload = () => {
+/* const onUpload = () => {
   console.log('teste33')
-}
+} */
 
 
 const handleCSVUpload = (event) => {
