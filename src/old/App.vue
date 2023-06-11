@@ -2,7 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router'
 /* import HelloWorld from './components/HelloWorld.vue' */
 import "primevue/resources/themes/lara-light-indigo/theme.css";
-import "primeicons/primeicons.css";
+
 </script>
 
 <template>

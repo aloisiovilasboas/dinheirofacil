@@ -2,10 +2,30 @@
   <main>
     <TheHome />
   </main>
-  <label for="csvFile">Importar CSV:</label>
-  <Button label="Submit" icon="pi pi-check" iconPos="right" />
-  <input type="file" accept=".csv" @change="handleCSVUpload" id="csvFile" name="csvFile">
-  <input type="file" @change="handleCSVUpload">
+  <div>
+    <!-- <Button @click="handleCSVUpload" label="Importar CSV" icon="pi pi-upload" iconPos="right" /> -->
+
+    <!-- <FileUpload mode="basic" name="demo[]" accept=".csv" @select="handleCSVUpload" @upload="onUpload" /> -->
+    <FileUpload mode="basic" chooseLabel="Subir CSV" accept=".csv" :auto="true" :customUpload="true"
+      @uploader="handleCSVUpload" />
+  </div>
+  <p>--</p>
+  <div>
+    <FileUpload mode="basic" chooseLabel="Subir OFX" accept=".ofx" :auto="true" :customUpload="true"
+      @uploader="handleCSVUpload" />
+  </div>
+  <div>
+
+    <div>
+      <label for="csvFile">Importar CSV:</label>
+      <input type="file" accept=".csv" @change="handleCSVUpload" id="csvFile" name="csvFile">
+    </div>
+    <div>
+      <input type="file" @change="handleCSVUpload">
+    </div>
+  </div>
+
+
   <p></p>
   <div class="">
 
@@ -29,17 +49,31 @@ import TheHome from '../components/TheHome.vue'
 import { ref } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Button from 'primevue/button';
+import FileUpload from 'primevue/fileupload';
+
+import 'primeicons/primeicons.css'
+import 'primevue/resources/primevue.min.css'
+import "primevue/resources/themes/lara-light-indigo/theme.css";
+
+
+
 
 /* import { useFilesStore } from '../stores/files.js'; */
 
 const tableData = ref([]);
 /* const store = useFilesStore(); */
 
+const onUpload = () => {
+  console.log('teste33')
+}
+
 
 const handleCSVUpload = (event) => {
-  console.log('opaa')
-  const file = event.target.files[0];
+
+
+
+  console.log(event.files[0])
+  const file = event.files[0];
   const reader = new FileReader();
   reader.onload = (e) => {
     const contents = e.target.result;
@@ -61,6 +95,7 @@ const handleCSVUpload = (event) => {
   };
   reader.readAsText(file);
 };
+
 </script>
 
 
