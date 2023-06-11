@@ -2,7 +2,10 @@
   <main>
     <TheHome />
   </main>
-  <input type="file" @change="handleFileUpload">
+  <label for="csvFile">Importar CSV:</label>
+  <Button label="Submit" icon="pi pi-check" iconPos="right" />
+  <input type="file" accept=".csv" @change="handleCSVUpload" id="csvFile" name="csvFile">
+  <input type="file" @change="handleCSVUpload">
   <p></p>
   <div class="">
 
@@ -21,54 +24,42 @@
   </div>
 </template>
 
-<script >
+<script setup>
 import TheHome from '../components/TheHome.vue'
 import { ref } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import Button from 'primevue/button';
+
 /* import { useFilesStore } from '../stores/files.js'; */
 
-export default {
-  name: 'HomeView',
-  components: {
-    TheHome, DataTable, Column
-  },
-  setup() {
-    const tableData = ref([]);
-    /* const store = useFilesStore(); */
+const tableData = ref([]);
+/* const store = useFilesStore(); */
 
 
-    const handleFileUpload = (event) => {
-      console.log('opaa')
-      const file = event.target.files[0];
-      const reader = new FileReader();
+const handleCSVUpload = (event) => {
+  console.log('opaa')
+  const file = event.target.files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const contents = e.target.result;
+    const rows = contents.split('\r\n');
+    const headers = rows[0].split(',');
 
-      reader.onload = (e) => {
-        const contents = e.target.result;
-        const rows = contents.split('\r\n');
-        const headers = rows[0].split(',');
-
-        const data = [];
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i].split(',');
-          const rowData = {};
-          for (let j = 0; j < row.length; j++) {
-            const cell = row[j];
-            rowData[headers[j]] = cell;
-          }
-          console.log(rowData);
-          data.push(rowData);
-        }
-        tableData.value = data;
-      };
-      reader.readAsText(file);
-    };
-
-    return {
-      tableData,
-      handleFileUpload,
-    };
-  },
+    const data = [];
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i].split(',');
+      const rowData = {};
+      for (let j = 0; j < row.length; j++) {
+        const cell = row[j];
+        rowData[headers[j]] = cell;
+      }
+      console.log(rowData);
+      data.push(rowData);
+    }
+    tableData.value = data;
+  };
+  reader.readAsText(file);
 };
 </script>
 
