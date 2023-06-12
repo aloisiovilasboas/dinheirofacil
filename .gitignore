@@ -1,3 +1,6 @@
+*.ofx
+*.csv
+
 # Logs
 logs
 *.log

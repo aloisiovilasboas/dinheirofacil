@@ -12,7 +12,7 @@
   <p>--</p>
   <div>
     <FileUpload mode="basic" chooseLabel="Subir OFX" accept=".ofx" :auto="true" :customUpload="true"
-      @uploader="handleCSVUpload" />
+      @uploader="handleOFXUpload" />
   </div>
   <div>
 
@@ -51,6 +51,9 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import FileUpload from 'primevue/fileupload';
 
+import * as txml from 'txml';
+
+
 import 'primeicons/primeicons.css'
 import 'primevue/resources/primevue.min.css'
 import "primevue/resources/themes/lara-light-indigo/theme.css";
@@ -69,9 +72,6 @@ const tableData = ref([]);
 
 
 const handleCSVUpload = (event) => {
-
-
-
   console.log(event.files[0])
   const file = event.files[0];
   const reader = new FileReader();
@@ -92,6 +92,26 @@ const handleCSVUpload = (event) => {
       data.push(rowData);
     }
     tableData.value = data;
+  };
+  reader.readAsText(file);
+};
+
+
+
+
+
+const handleOFXUpload = (event) => {
+  console.log(event.files[0])
+  const file = event.files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const ofxString = e.target.result;
+    console.log(txml.parse(ofxString))
+    /* todo */
+    
+    //console.log(ofxString);
+
+
   };
   reader.readAsText(file);
 };
