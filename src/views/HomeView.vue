@@ -31,12 +31,13 @@
 
     <DataTable v-if="tableData.length" :value="tableData" tableStyle="min-width: 50rem">
 
-      <Column field="date" header="Date"></Column>
+      <Column field="date" header="Data"></Column>
       <Column field="descricao" header="Descrição"></Column>
-      <Column field="parcela" header="Parcela"></Column>
+      <!--  <Column field="parcela" header="Parcela"></Column>
       <Column field="cidade" header="Cidade"></Column>
       <Column field="pais" header="País"></Column>
       <Column field="valorusd" header="Valor usd"></Column>
+      -->
       <Column field="valorbrl" header="Valor brl"></Column>
 
     </DataTable>
@@ -101,17 +102,32 @@ const handleCSVUpload = (event) => {
 
 
 const handleOFXUpload = (event) => {
-  console.log(event.files[0])
+  // console.log(event.files[0])
   const file = event.files[0];
   const reader = new FileReader();
   reader.onload = (e) => {
     const ofxString = e.target.result;
-    console.log(txml.parse(ofxString))
+    const objtree = txml.parse(ofxString)
+    const transacoes = objtree[1].children[1].children[0].children[2].children[2].children
+    console.log(transacoes)
+
     /* todo */
-    
-    //console.log(ofxString);
+    //const headers = ['descricao', 'parcela', 'cidade', 'pais', 'valorusd', 'valorbrl']
+    const headers = ['date', 'descricao', 'valorbrl']
+    console.log(headers)
+    const data = [];
+    for (let i = 1; i < transacoes.length; i++) {
 
-
+      if (transacoes[i].tagName == 'STMTTRN') {
+        console.log(transacoes[i])
+        const rowData = {}
+        rowData['date'] = transacoes[i].children[1].children[0]
+        rowData['descricao'] = transacoes[i].children[4].children[0]
+        rowData['valorbrl'] = transacoes[i].children[2].children[0]
+        data.push(rowData)
+      }
+    }
+    tableData.value = data;
   };
   reader.readAsText(file);
 };
