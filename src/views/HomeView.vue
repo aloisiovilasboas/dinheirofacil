@@ -38,7 +38,11 @@
       <Column field="pais" header="País"></Column>
       <Column field="valorusd" header="Valor usd"></Column>
       -->
-      <Column field="valorbrl" header="Valor brl"></Column>
+      <Column field="valor" class="valor" style="text-align: right;" header="Valor">
+<!--         <template  #header>
+          <div >Valor</div>
+        </template> -->
+      </Column>
 
     </DataTable>
 
@@ -121,9 +125,18 @@ const handleOFXUpload = (event) => {
       if (transacoes[i].tagName == 'STMTTRN') {
         console.log(transacoes[i])
         const rowData = {}
-        rowData['date'] = transacoes[i].children[1].children[0]
+        
+        const date = transacoes[i].children[1].children[0]
+        rowData['ano'] = date.substring(0, 4)
+        rowData['mes'] = date.substring(4, 6)
+        rowData['dia'] = date.substring(6, 8)
+        rowData['date'] = rowData['dia']+'/'+rowData['mes']+'/'+rowData['ano']
+        rowData['valor'] = transacoes[i].children[2].children[0]
+        rowData['valor'].replace('.', ',');
+        rowData['valor'] = 'R$ '+rowData['valor']
+        rowData['id'] = transacoes[i].children[3].children[0]
         rowData['descricao'] = transacoes[i].children[4].children[0]
-        rowData['valorbrl'] = transacoes[i].children[2].children[0]
+        rowData['tipo'] = transacoes[i].children[0].children[0]
         data.push(rowData)
       }
     }
