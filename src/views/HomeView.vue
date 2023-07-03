@@ -38,10 +38,10 @@
       <Column field="pais" header="País"></Column>
       <Column field="valorusd" header="Valor usd"></Column>
       -->
-      <Column field="valor" class="valor" style="text-align: right;" header="Valor">
-<!--         <template  #header>
-          <div >Valor</div>
-        </template> -->
+      <Column field="valor" class="valor" style="text-align: right;">
+        <template #header>
+          <div style="min-width: 100%">Valor (R$)</div>
+        </template>
       </Column>
 
     </DataTable>
@@ -91,9 +91,13 @@ const handleCSVUpload = (event) => {
       const rowData = {};
       for (let j = 0; j < row.length; j++) {
         const cell = row[j];
-        rowData[headers[j]] = cell;
+        if (headers[j] == 'valorbrl') {
+          rowData['valor'] = cell.replace('.', ',');
+        } else {
+          rowData[headers[j]] = cell;
+        }
+
       }
-      console.log(rowData);
       data.push(rowData);
     }
     tableData.value = data;
@@ -125,15 +129,15 @@ const handleOFXUpload = (event) => {
       if (transacoes[i].tagName == 'STMTTRN') {
         console.log(transacoes[i])
         const rowData = {}
-        
+
         const date = transacoes[i].children[1].children[0]
         rowData['ano'] = date.substring(0, 4)
         rowData['mes'] = date.substring(4, 6)
         rowData['dia'] = date.substring(6, 8)
-        rowData['date'] = rowData['dia']+'/'+rowData['mes']+'/'+rowData['ano']
+        rowData['date'] = rowData['dia'] + '/' + rowData['mes'] + '/' + rowData['ano']
         rowData['valor'] = transacoes[i].children[2].children[0]
-        rowData['valor'].replace('.', ',');
-        rowData['valor'] = 'R$ '+rowData['valor']
+        rowData['valor'] = rowData['valor'].replace('.', ',');
+        // rowData['valor'] = 'R$ ' + rowData['valor']
         rowData['id'] = transacoes[i].children[3].children[0]
         rowData['descricao'] = transacoes[i].children[4].children[0]
         rowData['tipo'] = transacoes[i].children[0].children[0]
