@@ -11,8 +11,8 @@ import "primevue/resources/themes/lara-light-indigo/theme.css";
     <div class="wrapper">
       <!-- <HelloWorld msg="You did it!" /> -->
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/">Documentos</RouterLink>
+        <RouterLink to="/about">Tags</RouterLink>
       </nav>
     </div>
   </header>

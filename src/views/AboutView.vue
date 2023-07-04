@@ -1,17 +1,33 @@
 <template>
   <div class="about">
-    <h1>Categorias</h1>
+    <h1>Tags</h1>
+    {{ value }}
 
     <div class="card flex justify-content-center">
-      <Button label="Show" icon="pi pi-external-link" @click="visible = true" />
-      <Dialog v-model:visible="visible" modal header="Header" :style="{ width: '50vw' }">
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-          magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-          consequat.
-          Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-          sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
+      <Button label="Criar Tag" icon="pi pi-plus" @click="visible = true" />
+      <Dialog v-model:visible="visible" modal :style="{ width: '50vw' }">
+
+
+        <h4>Tags Fonte</h4>
+
+        <!--  <div class="card p-fluid">
+          <AutoComplete v-model="value" dropdown multiple :suggestions="items" @complete="search1" />
+        </div> -->
+
+        <div class="card flex flex-column md:flex-row gap-3">
+
+          <div class="p-inputgroup flex-1">
+            <span class="p-inputgroup-addon">
+              <Checkbox v-model="checked1" :binary="true" />
+            </span>
+            <AutoComplete :disabled=!checked1 v-model="value" dropdown multiple :suggestions="items"
+              @complete="search1" />
+          </div>
+
+
+
+        </div>
+
       </Dialog>
     </div>
 
@@ -61,8 +77,23 @@ import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Badge from 'primevue/badge';
+import AutoComplete from 'primevue/autocomplete';
 
-import { ref } from "vue";
+import Checkbox from 'primevue/checkbox';
+
+
+import { ref, } from "vue";
+
+
+const checked1 = ref(false);
+
+
+
+
+const filteredTags = ref();
+
+
+
 
 const visible = ref(false);
 const tableData =
@@ -93,6 +124,24 @@ const getSeverity = (filtro) => {
       return null;
   }
 };
+
+
+const value = ref("");
+const items = ref([]);
+
+const search1 = () => {
+  items.value = tableData.value.map((item) => item.nomeTag);
+}
+const search = (event) => {
+  if (!event.query.trim().length) {
+    filteredTags.value = tableData.value.map((item) => item.nomeTag);
+  } else {
+    filteredTags.value = tableData.value.filter((tag) => {
+      return tag.nomeTag.startsWith(event.query);
+    });
+  }
+
+}
 
 
 
