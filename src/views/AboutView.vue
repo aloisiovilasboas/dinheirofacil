@@ -6,7 +6,10 @@
     <div class="card flex justify-content-center">
       <Button label="Criar Tag" icon="pi pi-plus" @click="visible = true" />
       <Dialog v-model:visible="visible" modal :style="{ width: '50vw' }">
-
+        <span class="p-float-label">
+          <InputText id="username" v-model="value" />
+          <label for="username">Username</label>
+        </span>
 
         <h4>Tags Fonte</h4>
 
@@ -80,7 +83,7 @@ import Badge from 'primevue/badge';
 import AutoComplete from 'primevue/autocomplete';
 
 import Checkbox from 'primevue/checkbox';
-
+import InputText from 'primevue/inputtext';
 
 import { ref, } from "vue";
 
@@ -112,13 +115,13 @@ const tableData =
 const getSeverity = (filtro) => {
   switch (filtro.tipoFiltro) {
     case 'Valor':
-      return 'success';
+      return 'warning';
 
     case 'Descricao':
       return 'warning';
 
     case 'Data':
-      return 'danger';
+      return 'warning';
 
     default:
       return null;
