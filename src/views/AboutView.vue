@@ -8,119 +8,120 @@
     <p>{{ valorMaiorque }}</p>
 
 
-    <div class="card flex justify-content-center">
-      <Button label="Criar Tag" icon="pi pi-plus" @click="visible = true" />
-      <Dialog v-model:visible="visible" modal :style="{ width: '50vw' }">
-        <span class="p-float-label">
-          <InputText id="nomeNovaTag" v-model="nomeNovaTag" />
-          <label for="nomeNovaTag">Nome da nova tag</label>
-        </span>
+
+    <Button label="Criar Tag" icon="pi pi-plus" @click="visible = true" />
+    <Dialog v-model:visible="visible" modal :style="{ width: '50vw' }">
+      <h4>Nome</h4>
+      <span class="p-float-label">
+        <InputText id="nomeNovaTag" v-model="nomeNovaTag" />
+
+      </span>
 
 
 
-        <!--  <div class="card p-fluid">
+      <!--  <div class="card p-fluid">
           <AutoComplete v-model="value" dropdown multiple :suggestions="items" @complete="search1" />
         </div> -->
 
-        <div class="card flex flex-column md:flex-row gap-3">
-          <h4>Tags Fonte</h4>
+      <div class="card flex flex-column md:flex-row gap-3">
+        <h4>Tags Fonte</h4>
 
-          <div class="p-inputgroup flex-1">
-            <span class="p-inputgroup-addon">
-              <Checkbox v-model="checked1" :binary="true" />
-            </span>
-            <AutoComplete :disabled=!checked1 v-model="nomesTagsFontes" dropdown multiple :suggestions="items"
-              @complete="search1" />
+        <div class="p-inputgroup flex-1">
+          <span class="p-inputgroup-addon">
+            <Checkbox v-model="checked1" :binary="true" />
+          </span>
+          <AutoComplete :disabled=!checked1 v-model="nomesTagsFontes" dropdown multiple :suggestions="items"
+            @complete="search1" />
+        </div>
+      </div>
+      <div style="min-height: 10pt;"></div>
+
+
+      <div class="card flex flex-column md:flex-row gap-3">
+        <h4>Filtros</h4>
+
+        <Button v-for="filter of filtrosNovaTag" :key="filter.filtro" :severity="getSeverity(filter)"
+          :label="filter.filtro" rounded icon="pi pi-times-circle" iconPos="right" size="small"
+          @click="deleteFiltro(filter.filtro)" />
+
+      </div>
+
+
+      <div class="card flex justify-content-center">
+        <Button label="Filtro" icon="pi pi-plus" @click="visible1 = true" />
+        <Dialog v-model:visible="visible1" modal :style="{ width: '50vw' }">
+
+
+          <div class="flex flex-row gap-3">
+            <h4>Tipo do filtro</h4>
+            <div class="flex align-items-center">
+              <RadioButton v-model="tipoFiltro" inputId="descricaoradio" name="descricaoradio" value="Descrição" />
+              <label for="descricaoradio" class="ml-2">Descrição</label>
+            </div>
+            <div class="flex align-items-center">
+              <RadioButton v-model="tipoFiltro" inputId="valorradio" name="valorradio" value="Valor" />
+              <label for="valorradio" class="ml-2">Valor</label>
+            </div>
+            <div class="flex align-items-center">
+              <RadioButton v-model="tipoFiltro" inputId="dataradio" name="dataradio" value="Data" />
+              <label for="dataradio" class="ml-2">Data</label>
+            </div>
           </div>
-        </div>
-        <div style="min-height: 10pt;"></div>
 
+          <div v-if="tipoFiltro == 'Descrição'" class="flex flex-row gap-3">
+            <h4>Sequencia a ser buscada na descrição das transações:</h4>
+            <span class="p-float-label">
+              <InputText id="nomeNovoFiltro" v-model="filtroDescricao" />
+              <label for="nomeNovoFiltro">Ex: POSTO BRASIL</label>
+            </span>
+          </div>
+          <div v-if="tipoFiltro == 'Valor'" class="flex flex-row gap-3">
+            <h4>Selecione o intervalo do valor a ser identificado nas transações</h4>
 
-        <div>
-          <h4>Filtros</h4>
-
-          <Button v-for="filter of filtrosNovaTag" :key="filter.filtro" :severity="getSeverity(filter)"
-            :label="filter.filtro" rounded icon="pi pi-times-circle" iconPos="right" size="small"
-            @click="deleteFiltro(filter.filtro)" />
-
-        </div>
-
-
-        <div class="card flex justify-content-center">
-          <Button label="Filtro" icon="pi pi-plus" @click="visible1 = true" />
-          <Dialog v-model:visible="visible1" modal :style="{ width: '50vw' }">
-
-
-            <div class="flex flex-row gap-3">
-              <h4>Tipo do filtro</h4>
-              <div class="flex align-items-center">
-                <RadioButton v-model="tipoFiltro" inputId="descricaoradio" name="descricaoradio" value="Descrição" />
-                <label for="descricaoradio" class="ml-2">Descrição</label>
-              </div>
-              <div class="flex align-items-center">
-                <RadioButton v-model="tipoFiltro" inputId="valorradio" name="valorradio" value="Valor" />
-                <label for="valorradio" class="ml-2">Valor</label>
-              </div>
-              <div class="flex align-items-center">
-                <RadioButton v-model="tipoFiltro" inputId="dataradio" name="dataradio" value="Data" />
-                <label for="dataradio" class="ml-2">Data</label>
-              </div>
-            </div>
-
-            <div v-if="tipoFiltro == 'Descrição'" class="flex flex-row gap-3">
-              <h4>Sequencia a ser buscada na descrição das transações:</h4>
-              <span class="p-float-label">
-                <InputText id="nomeNovoFiltro" v-model="filtroDescricao" />
-                <label for="nomeNovoFiltro">Ex: POSTO BRASIL</label>
+            <div class="p-inputgroup flex-1">
+              <span class="p-inputgroup-addon">
+                {{ 'menor que' }}
               </span>
+              <InputText id="valorMenorq" v-model="valorMenorque" />
             </div>
-            <div v-if="tipoFiltro == 'Valor'" class="flex flex-row gap-3">
-              <h4>Selecione o intervalo do valor a ser identificado nas transações</h4>
 
-              <div class="p-inputgroup flex-1">
-                <span class="p-inputgroup-addon">
-                  {{ 'menor que' }}
-                </span>
-                <InputText id="valorMenorq" v-model="valorMenorque" />
-              </div>
-
-              <div class="p-inputgroup flex-1">
-                <span class="p-inputgroup-addon">
-                  {{ 'maior que' }}
-                </span>
-                <InputText id="valorMenorq" v-model="valorMaiorque" />
-              </div>
-
-
-            </div>
-            <div v-if="tipoFiltro == 'Data'" class="flex flex-row gap-3">
-              <h4>Selecione o intervalo de datas a ser identificado nas transações</h4>
-
-              <div class="p-inputgroup flex-1">
-                <span class="p-inputgroup-addon">
-                  {{ 'menor que' }}
-                </span>
-                <InputText id="diaMenorQ" v-model="diaMenorQue" />
-              </div>
-
-              <div class="p-inputgroup flex-1">
-                <span class="p-inputgroup-addon">
-                  {{ 'maior que' }}
-                </span>
-                <InputText id="diaMaiorQ" v-model="diaMaiorQue" />
-              </div>
+            <div class="p-inputgroup flex-1">
+              <span class="p-inputgroup-addon">
+                {{ 'maior que' }}
+              </span>
+              <InputText id="valorMenorq" v-model="valorMaiorque" />
             </div>
 
 
-            <Button label="Salvar" icon="pi pi-save" @click=addFiltro() />
-          </Dialog>
-        </div>
-        {{ }}
-        <Button label="Salvar" icon="pi pi-save" @click=addTag() :disabled=!nomeNovaTag.length />
+          </div>
+          <div v-if="tipoFiltro == 'Data'" class="flex flex-row gap-3">
+            <h4>Selecione o intervalo de datas a ser identificado nas transações</h4>
+
+            <div class="p-inputgroup flex-1">
+              <span class="p-inputgroup-addon">
+                {{ 'menor que' }}
+              </span>
+              <InputText id="diaMenorQ" v-model="diaMenorQue" />
+            </div>
+
+            <div class="p-inputgroup flex-1">
+              <span class="p-inputgroup-addon">
+                {{ 'maior que' }}
+              </span>
+              <InputText id="diaMaiorQ" v-model="diaMaiorQue" />
+            </div>
+          </div>
 
 
-      </Dialog>
-    </div>
+          <Button label="Salvar" icon="pi pi-save" @click=addFiltro() />
+        </Dialog>
+      </div>
+      {{ }}
+      <Button label="Salvar" icon="pi pi-save" @click=addTag() :disabled=!nomeNovaTag.length />
+
+
+    </Dialog>
+
 
     <div class="">
 
@@ -193,7 +194,7 @@ const valorMaiorque = ref('');
 const diaMenorQue = ref()
 
 const diaMaiorQue = ref()
-const filtrosNovaTag = ref([{ tipoFiltro: 'Valor', filtro: 'valor<200' }, { tipoFiltro: 'Descricao', filtro: 'PostosPiranema' }])
+const filtrosNovaTag = ref([])
 
 
 const visible = ref(false);
