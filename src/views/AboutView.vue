@@ -1,11 +1,14 @@
 <template>
   <div class="about">
     <h1>Tags</h1>
+    <!-- <p>{{ tagsStore.tags }}</p>
+    <p>{{ tableData }}</p>
+
     <p>{{ nomeNovaTag }}</p>
     <p>{{ nomesTagsFontes }}</p>
     <p>{{ tipoFiltro }}</p>
     <p>{{ filtroDescricao }}</p>
-    <p>{{ valorMaiorque }}</p>
+    <p>{{ valorMaiorque }}</p> -->
 
 
 
@@ -89,7 +92,7 @@
               <span class="p-inputgroup-addon">
                 {{ 'maior que' }}
               </span>
-              <InputText id="valorMenorq" v-model="valorMaiorque" />
+              <InputText id="valorMaiorque" v-model="valorMaiorque" />
             </div>
 
 
@@ -178,6 +181,9 @@ import InputText from 'primevue/inputtext';
 
 import { ref, } from "vue";
 
+import { useTagsStore } from "../stores/tagsStore"
+const tagsStore = useTagsStore();
+
 
 const checked1 = ref(false);
 
@@ -191,26 +197,27 @@ const filtroDescricao = ref('');
 const valorMenorque = ref('');
 const valorMaiorque = ref('');
 
-const diaMenorQue = ref()
+const diaMenorQue = ref('')
 
-const diaMaiorQue = ref()
+const diaMaiorQue = ref('')
 const filtrosNovaTag = ref([])
 
 
 const visible = ref(false);
 const visible1 = ref(false);
-const tableData =
-  ref([
-    { nomeTag: 'Geral', tagsFontes: [], filtros: [] },
-    { nomeTag: 'Celular', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Descricao', filtro: 'TIM' }] },
+const tableData = ref(tagsStore.tags);
 
-    { nomeTag: 'Deso', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Descricao', filtro: 'Deso S.A.' }] },
-    { nomeTag: 'Fixas', tagsFontes: [{ nomeTag: 'Deso' }, { nomeTag: 'Celular' }], filtros: [] },
-    { nomeTag: 'PostosPiranema', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Descricao', filtro: 'PostosPiranema' }] },
-    { nomeTag: 'Forneria', tagsFontes: [{ nomeTag: 'PostosPiranema' }], filtros: [{ tipoFiltro: 'Valor', filtro: 'valor>200' }] },
-    { nomeTag: 'Gasolina', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Valor', filtro: 'valor<200' }, { tipoFiltro: 'Descricao', filtro: 'PostosPiranema' }] },
-    { nomeTag: 'Final do Mes', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Data', filtro: 'data>25' }] }
-  ]);
+/* ref([
+  { nomeTag: 'Geral', tagsFontes: [], filtros: [] },
+  { nomeTag: 'Celular', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Descricao', filtro: 'TIM' }] },
+
+  { nomeTag: 'Deso', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Descricao', filtro: 'Deso S.A.' }] },
+  { nomeTag: 'Fixas', tagsFontes: [{ nomeTag: 'Deso' }, { nomeTag: 'Celular' }], filtros: [] },
+  { nomeTag: 'PostosPiranema', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Descricao', filtro: 'PostosPiranema' }] },
+  { nomeTag: 'Forneria', tagsFontes: [{ nomeTag: 'PostosPiranema' }], filtros: [{ tipoFiltro: 'Valor', filtro: 'valor>200' }] },
+  { nomeTag: 'Gasolina', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Valor', filtro: 'valor<200' }, { tipoFiltro: 'Descricao', filtro: 'PostosPiranema' }] },
+  { nomeTag: 'Final do Mes', tagsFontes: [{ nomeTag: 'Geral' }], filtros: [{ tipoFiltro: 'Data', filtro: 'data>25' }] }
+]); */
 
 const deleteFiltro = (filtro) => {
   const index = filtrosNovaTag.value.findIndex(obj => obj.filtro === filtro);
@@ -244,24 +251,24 @@ const addFiltro = () => {
 
   if (tipoFiltro.value == 'Valor') {
     f.filtro = ''
-    if (valorMenorque.value !== '') {
-      f.filtro = f.filtro + valorMenorque.value + '<'
+    if (valorMaiorque.value !== '') {
+      f.filtro = f.filtro + valorMaiorque.value + '<'
     }
     f.filtro = f.filtro + 'Valor'
-    if (valorMaiorque.value !== '') {
-      f.filtro = f.filtro + '<' + valorMaiorque.value
+    if (valorMenorque.value !== '') {
+      f.filtro = f.filtro + '<' + valorMenorque.value
     }
 
 
   } else if (tipoFiltro.value == 'Data') {
 
     f.filtro = ''
-    if (diaMenorQue.value !== '') {
-      f.filtro = f.filtro + diaMenorQue.value + '<'
+    if (diaMaiorQue.value !== '') {
+      f.filtro = f.filtro + diaMaiorQue.value + '<'
     }
     f.filtro = f.filtro + 'Data'
-    if (diaMaiorQue.value !== '') {
-      f.filtro = f.filtro + '<' + diaMaiorQue.value
+    if (diaMenorQue.value !== '') {
+      f.filtro = f.filtro + '<' + diaMenorQue.value
     }
 
   }
@@ -300,6 +307,7 @@ const nomeNovaTag = ref("")
 const items = ref([]);
 
 const search1 = () => {
+
   items.value = tableData.value.map((item) => item.nomeTag);
 }
 
