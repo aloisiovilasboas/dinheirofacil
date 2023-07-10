@@ -128,7 +128,7 @@
 
     <div class="">
 
-      <DataTable v-if="tableData.length" :value="tableData" tableStyle="min-width: 50rem">
+      <DataTable v-if="tagsStore.tags.length" :value="tagsStore.tags" tableStyle="min-width: 50rem">
 
         <Column field="nomeTag" header="Nome"></Column>
         <Column field="tagsFontes" header="Tags Fontes">
@@ -141,6 +141,7 @@
             </div>
           </template>
         </Column>
+        
         <!--  <Column field="parcela" header="Parcela"></Column>
   <Column field="cidade" header="Cidade"></Column>
   <Column field="pais" header="País"></Column>
@@ -154,6 +155,15 @@
               <Badge v-for="filter of slotProps.data.filtros" :key="filter.filtro" :severity="getSeverity(filter)"
                 :value="filter.filtro">
               </Badge>
+
+            </div>
+          </template>
+        </Column>
+        <Column>
+          <template #body="slotProps">
+            <div>
+              {{ slotProps.data.nomeTag }}
+              <Button label="" icon="pi pi-trash" @click="delTag(slotProps.data.nomeTag)" />
 
             </div>
           </template>
@@ -205,7 +215,7 @@ const filtrosNovaTag = ref([])
 
 const visible = ref(false);
 const visible1 = ref(false);
-const tableData = ref(tagsStore.tags);
+/* const tableData = ref(tagsStore.tags); */
 
 /* ref([
   { nomeTag: 'Geral', tagsFontes: [], filtros: [] },
@@ -220,9 +230,26 @@ const tableData = ref(tagsStore.tags);
 ]); */
 
 const deleteFiltro = (filtro) => {
-  const index = filtrosNovaTag.value.findIndex(obj => obj.filtro === filtro);
+  const index =  filtrosNovaTag.value.findIndex(obj => obj.filtro === filtro);
   if (index > -1) {
     filtrosNovaTag.value.splice(index, 1);
+  }
+}
+
+const delTag1 = (nometag) => {
+  
+  console.log(nometag);
+  //const index = nomesTagsFontes.value.findIndex(obj => obj.nometag === nometag);
+  console.log(tableData.value);
+}
+
+const delTag = (nomedatag) => {
+   console.log( nomedatag);
+  /* console.log( tagsStore.tags[1].nomeTag);  */
+  const index = tagsStore.tags.findIndex(obj => {console.log(obj.nomeTag);console.log(obj.nometag === nomedatag); obj.nometag === nomedatag});
+  console.log(index);
+  if (index > -1) {
+    tagsStore.tags.splice(index, 1);
   }
 }
 
@@ -243,7 +270,7 @@ const addTag = () => {
   checked1.value = false
   nomeNovaTag.value = ''
   visible.value = false
-  tableData.value.push(t)
+  tagsStore.tags.push(t)
 }
 
 const addFiltro = () => {
