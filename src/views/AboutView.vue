@@ -236,12 +236,7 @@ const deleteFiltro = (filtro) => {
   }
 }
 
-const delTag1 = (nometag) => {
-  
-  console.log(nometag);
-  //const index = nomesTagsFontes.value.findIndex(obj => obj.nometag === nometag);
-  console.log(tableData.value);
-}
+
 
 const delTag = (nomedatag) => {
    console.log( nomedatag);
