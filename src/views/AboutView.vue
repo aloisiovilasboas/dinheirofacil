@@ -141,7 +141,7 @@
             </div>
           </template>
         </Column>
-        
+
         <!--  <Column field="parcela" header="Parcela"></Column>
   <Column field="cidade" header="Cidade"></Column>
   <Column field="pais" header="País"></Column>
@@ -159,10 +159,10 @@
             </div>
           </template>
         </Column>
-        <Column>
+        <Column header="Delete">
           <template #body="slotProps">
             <div>
-              {{ slotProps.data.nomeTag }}
+              <!-- {{ slotProps.data.nomeTag }} -->
               <Button label="" icon="pi pi-trash" @click="delTag(slotProps.data.nomeTag)" />
 
             </div>
@@ -230,7 +230,7 @@ const visible1 = ref(false);
 ]); */
 
 const deleteFiltro = (filtro) => {
-  const index =  filtrosNovaTag.value.findIndex(obj => obj.filtro === filtro);
+  const index = filtrosNovaTag.value.findIndex(obj => obj.filtro === filtro);
   if (index > -1) {
     filtrosNovaTag.value.splice(index, 1);
   }
@@ -239,9 +239,9 @@ const deleteFiltro = (filtro) => {
 
 
 const delTag = (nomedatag) => {
-   console.log( nomedatag);
+  console.log(typeof (nomedatag));
   /* console.log( tagsStore.tags[1].nomeTag);  */
-  const index = tagsStore.tags.findIndex(obj => {console.log(obj.nomeTag);console.log(obj.nometag === nomedatag); obj.nometag === nomedatag});
+  const index = tagsStore.tags.findIndex(obj => obj.nomeTag === nomedatag);
   console.log(index);
   if (index > -1) {
     tagsStore.tags.splice(index, 1);
@@ -330,7 +330,7 @@ const items = ref([]);
 
 const search1 = () => {
 
-  items.value = tableData.value.map((item) => item.nomeTag);
+  items.value = tagsStore.tags.map((item) => item.nomeTag);
 }
 
 /* const search = (event) => {
