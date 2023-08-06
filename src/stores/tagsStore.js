@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
-import {ref, watch} from 'vue'
+import { ref } from 'vue'
 
-export const useTagsStore = defineStore('tags',()=>{
-  const tags = ref(
-    [{ nomeTag: 'Geral', tagsFontes: [], filtros: [] }] 
-  );
+export const useTagsStore = defineStore('tags', () => {
+  const tags = ref([{ nomeTag: 'Geral', tagsFontes: [], filtros: [] }])
 
-  if (localStorage.getItem("tagsval")){
+  //pra usar local storage pra guardar as tags:
+  /*   if (localStorage.getItem("tagsval")){
     tags.value = JSON.parse(localStorage.getItem("tagsval"))
   }
 
@@ -16,7 +15,7 @@ export const useTagsStore = defineStore('tags',()=>{
       localStorage.setItem('tagsval',JSON.stringify(tagsval))
     },
     {deep: true}
-  )
+  ) */
   return {
     tags
   }

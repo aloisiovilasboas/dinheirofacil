@@ -173,6 +173,7 @@
 
     </div>
   </div>
+  <Button label="Salvar Tags" icon="pi pi-plus" @click="salvaTags()" />
 </template>
 
 <script setup>
@@ -331,7 +332,32 @@ const items = ref([]);
 const search1 = () => {
 
   items.value = tagsStore.tags.map((item) => item.nomeTag);
+};
+
+function salvaTags(exportObj = tagsStore.tags, exportName = 'tesssste') {
+  var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+  var downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", exportName + ".json");
+  document.body.appendChild(downloadAnchorNode); // required for firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
 }
+
+/* import { writeDb } from "../stores/json-db-main/dbFunctions.js"
+const salvaTagss = () => {
+
+
+
+
+
+
+  const dataObj = {
+    james: 'hello'
+  }
+
+  writeDb(dataObj)
+} */
 
 /* const search = (event) => {
   if (!event.query.trim().length) {
