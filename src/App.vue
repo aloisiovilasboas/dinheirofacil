@@ -1,6 +1,26 @@
 <script setup>
+
+import Button from 'primevue/button';
 import { RouterLink, RouterView } from 'vue-router'
 /* import HelloWorld from './components/HelloWorld.vue' */
+import { useTagsStore } from "./stores/tagsStore"
+const tagsStore = useTagsStore();
+
+
+
+
+function salvaTags(exportObj = tagsStore.tags) {
+  const d = new Date();
+  var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+  var downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", d.toTimeString() + ".json");
+  document.body.appendChild(downloadAnchorNode); // required for firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+}
+
+
 
 </script>
 
@@ -9,10 +29,17 @@ import { RouterLink, RouterView } from 'vue-router'
     <!-- <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" /> -->
     <div class="wrapper">
       <!-- <HelloWorld msg="You did it!" /> -->
-      <nav>
-        <RouterLink to="/">Documentos</RouterLink>
-        <RouterLink to="/about">Categorias</RouterLink>
+      <nav >
+        <Button label="Salvar" icon="pi pi-download" text @click="salvaTags()" />
+        <Button label="Garregar" icon="pi pi-upload" text @click="salvaTags()" />
       </nav>
+      <nav >
+        <RouterLink to="/">Resumo</RouterLink>
+        <RouterLink to="/documentos">Importar Documentos</RouterLink>
+        <RouterLink to="/tags">Tags de Classificação</RouterLink>
+
+      </nav>
+      
     </div>
   </header>
 
@@ -31,11 +58,11 @@ import { RouterLink, RouterView } from 'vue-router'
   margin: 0 auto 2rem;
 }
 
+
 nav {
   width: 100%;
   font-size: 12px;
   text-align: center;
-  margin-top: 2rem;
 }
 
 nav a.router-link-exact-active {

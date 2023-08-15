@@ -1,1 +1,4 @@
-ler ofx
+salvar dados na navbar ✔
+    colocar data no nome do arquivo ✔
+garregar dados na navbar
+colocar ao menos 1 filtro para salvar

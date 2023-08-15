@@ -17,7 +17,7 @@ const date = ref();
 <template>
   <MenuItem>
   <div class="card flex justify-content-center">
-    <Calendar v-model="date" view="month" dateFormat="mm/yy" />
+    <Calendar showIcon v-model="date" view="month" dateFormat="mm/yy" />
   </div>
   <template #heading>Resumo</template>
   <template #icon>

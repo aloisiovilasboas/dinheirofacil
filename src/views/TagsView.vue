@@ -1,6 +1,12 @@
 <template>
+  <MenuItem>
+    <template #heading>Tags de Classificação</template>
+    <template #icon>
+      <DocumentationIcon />
+    </template>
+  </MenuItem>
   <div class="about">
-    <h1>Tags</h1>
+    
     <!-- <p>{{ tagsStore.tags }}</p>
     <p>{{ tableData }}</p>
 
@@ -12,7 +18,7 @@
 
 
 
-    <Button label="Criar Tag" icon="pi pi-plus" @click="visible = true" />
+    <Button label="Criar Tag" text icon="pi pi-plus" @click="visible = true" />
     <Dialog v-model:visible="visible" modal :style="{ width: '50vw' }">
       <h4>Nome</h4>
       <span class="p-float-label">
@@ -173,10 +179,12 @@
 
     </div>
   </div>
-  <Button label="Salvar Tags" icon="pi pi-plus" @click="salvaTags()" />
+  
 </template>
 
 <script setup>
+
+import DocumentationIcon from '../components/icons/IconDocumentation.vue'
 
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
@@ -191,6 +199,7 @@ import InputText from 'primevue/inputtext';
 /* import Chips from 'primevue/chips'; */
 
 import { ref, } from "vue";
+import MenuItem from '../components/MenuItem.vue'
 
 import { useTagsStore } from "../stores/tagsStore"
 const tagsStore = useTagsStore();
@@ -334,7 +343,7 @@ const search1 = () => {
   items.value = tagsStore.tags.map((item) => item.nomeTag);
 };
 
-function salvaTags(exportObj = tagsStore.tags, exportName = 'tesssste') {
+/* function salvaTags(exportObj = tagsStore.tags, exportName = 'tesssste') {
   var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
   var downloadAnchorNode = document.createElement('a');
   downloadAnchorNode.setAttribute("href", dataStr);
@@ -342,7 +351,7 @@ function salvaTags(exportObj = tagsStore.tags, exportName = 'tesssste') {
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
-}
+} */
 
 /* import { writeDb } from "../stores/json-db-main/dbFunctions.js"
 const salvaTagss = () => {
