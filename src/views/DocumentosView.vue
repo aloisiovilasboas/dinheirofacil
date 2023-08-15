@@ -1,48 +1,46 @@
 <template>
-  
-    <!-- <TheHome /> -->
-
-    <MenuItem>
-    <template #heading>Importar Documentos</template>
-    <template #icon>
-      <DocumentationIcon />
-    </template>
-    </MenuItem>
+  <MenuItem>
+  <template #heading>Importar Documentos</template>
+  <template #icon>
+    <DocumentationIcon />
+  </template>
+  </MenuItem>
 
 
 
 
+  <div class="card">
+    <h3>Cartões</h3>
+    <DataView paginator :rows="5" :value="contasStore.contas.cartoes">
+      <template #list="slotProps">
+        <div class="col-12">
+          <div class="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
+            <div>{{ slotProps.data.nome }}</div>
+            <div class="text-2xl font-bold text-900">{{ slotProps.data.name }}</div>
+          </div>
+        </div>
+      </template>
+    </DataView>
+  </div>
 
-  
+
 
 
   <nav>
+    <Calendar showIcon v-model="date" view="month" dateFormat="mm/yy" />
     <FileUpload mode="basic" chooseLabel="Subir CSV" accept=".csv" :auto="true" :customUpload="true"
       @uploader="handleCSVUpload" />
-
     <FileUpload mode="basic" chooseLabel="Subir OFX" accept=".ofx" :auto="true" :customUpload="true"
       @uploader="handleOFXUpload" />
-
   </nav>
 
 
 
 
-  <!-- <div>
-
-    <div>
-      <label for="csvFile">Importar CSV:</label>
-      <input type="file" accept=".csv" @change="handleCSVUpload" id="csvFile" name="csvFile">
-    </div>
-    <div>
-      <input type="file" @change="handleCSVUpload">
-    </div>
-  </div> -->
 
 
   <p></p>
   <div class="">
-
     <DataTable v-if="tableData.length" :value="tableData" tableStyle="min-width: 50rem">
 
       <Column field="date" header="Data"></Column>
@@ -57,16 +55,24 @@
           <div style="min-width: 100%">Valor (R$)</div>
         </template>
       </Column>
-
     </DataTable>
-
   </div>
 </template>
 
 <script setup>
+import 'primeflex/primeflex.css';
+
+import { useContasStore } from "../stores/contasStore"
+const contasStore = useContasStore();
+/* console.log(contasStore.contas.cartoes); */
+
+
+import DataView from 'primevue/dataview';
+/* import DataViewLayoutOptions from 'primevue/dataviewlayoutoptions' */
+
 import DocumentationIcon from '../components/icons/IconDocumentation.vue'
-/* import Calendar from 'primevue/calendar';
-const date = ref(); */
+import Calendar from 'primevue/calendar';
+const date = ref();
 
 /* import TheHome from '../components/TheHome.vue' */
 import MenuItem from '../components/MenuItem.vue'
