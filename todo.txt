@@ -1,0 +1,27 @@
+Categorias e subcategorias 
+	Crud de Arvore de categorias DONE
+	Crud de Marcadores para aplicar categoria ou subcategoria DONE
+
+	adicionar filtros, a qual conta e cartao se aplica aquela categoria
+	
+	Contas e Cartoes
+	- nome
+	- lista dos documentos importados daquela conta/cartao
+	- transacoes
+
+
+	Importar documento:
+		nome documento: Ex: Visa Cartao XP Junho
+		seleciona a conta ou cartao
+		importa transacoes
+		exibe transacoes duplicadas
+		pergunta se deseja aplicar as categorias
+			se sim, exibe quantas transacoes ficaram sem categorizar pelos filtros
+
+	Integrar com projeto trataFatura onde já está feita a leitura dos documentos
+
+implementar no 'admin' a possibilidade de colocar formatos dos bancos 'BB, XP' etc
+
+Perfil
+Uma barra de ferramentas com um filtro de data inicial e final, e uma checklist de quais contas/cartoes a serem exibidos
+uma tabela com todas as transacoes importadas
