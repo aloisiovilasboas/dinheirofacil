@@ -6,7 +6,7 @@ Controle Financeiro em Vue baseado em filtros e categorias
 
 ### Compile and Hot-Reload for Development
 
-```sh
+```
 npm run dev
 ```
 
