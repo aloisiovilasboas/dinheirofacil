@@ -50,14 +50,36 @@
 
                 <Column field="date" header="Data"></Column>
                 <Column field="descricao" header="Descrição"></Column>
-                <!--  <Column field="parcela" header="Parcela"></Column>
-<Column field="cidade" header="Cidade"></Column>
-<Column field="pais" header="País"></Column>
-<Column field="valorusd" header="Valor usd"></Column>
--->
+                <!-- <Column field="parcela" header="Parcela"></Column>
+                <Column field="cidade" header="Cidade"></Column>
+                <Column field="pais" header="País"></Column>
+                <Column field="valorusd" header="Valor usd"></Column> -->
                 <Column field="valor" class="valor" style="text-align: right;">
                     <template #header>
                         <div style="min-width: 100%">Valor (R$)</div>
+                    </template>
+                </Column>
+                <Column field="categoria" header="Categoria">
+
+                    <template #body="rowData">
+                        <!-- {{ rowData.data }} -->
+                        {{ categoriasStore.categorias }}
+                        <TreeSelect value="rowData.categoria" :options="categoriasStore.categorias"
+                            placeholder="Select Item" class="md:w-80 w-full">
+                            <template #options>
+                                <span>{{ "asd" }}</span>
+                            </template>
+
+                            <template #footer>
+                                <div class="px-3 pt-1 pb-2 flex justify-between">
+                                    <Button label="Nova Categoria" severity="secondary" text size="small"
+                                        icon="pi pi-plus" />
+
+                                </div>
+                            </template>
+
+                        </TreeSelect>
+
                     </template>
                 </Column>
             </DataTable>
@@ -83,6 +105,8 @@ defineProps({
     id: String
 })
 
+import { onBeforeMount } from 'vue';
+
 import Card from 'primevue/card';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -90,6 +114,20 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Select from 'primevue/select';
 import FileUpload from 'primevue/fileupload';
+
+import TreeSelect from 'primevue/treeselect';
+
+import { useCategoriasStore } from '@/stores/categoriasStore';
+
+import { useFiltrosStore } from '@/stores/filtrosStore';
+const filtrosStore = useFiltrosStore();
+
+import { useUserStore } from '@/stores/user';
+const userStore = useUserStore();
+
+
+const categoriasStore = useCategoriasStore();
+
 import { ref } from 'vue';
 
 import { useContasStore } from '@/stores/contasStore';
@@ -187,6 +225,7 @@ const handleOFXUpload = (event) => {
                 rowData['id'] = transacoes[i].children[3].children[0]
                 rowData['descricao'] = transacoes[i].children[4].children[0]
                 rowData['tipo'] = transacoes[i].children[0].children[0]
+                rowData['Categoria'] = { id: 1, nome: 'teste' }
                 data.push(rowData)
             }
         }
@@ -194,6 +233,29 @@ const handleOFXUpload = (event) => {
     };
     reader.readAsText(file);
 };
+
+
+
+const loadCategoriasEFiltros = async () => {
+    console.log(userStore.user.id);
+    await filtrosStore.loadFiltros(userStore.user.id);
+    await categoriasStore.loadCategories(userStore.user.id);
+    console.log(categoriasStore.categorias);
+};
+
+
+
+const loadmodelosbancos = () => {
+    contasStore.loadmodelosbancos();
+};
+
+onBeforeMount(() => {
+    contasStore.loadContas(userStore.user.id);
+    loadmodelosbancos();
+    loadCategoriasEFiltros();
+});
+
+
 
 
 
