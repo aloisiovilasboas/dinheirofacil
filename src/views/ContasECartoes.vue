@@ -1,23 +1,27 @@
 <template>
     <div class="flex flex-column">
         <TabView>
-            <TabPanel header="Contas" :disabled="false">
-                <Button label="Conta" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewConta" />
+            <TabPanel header="Recursos" :disabled="false">
+                <Button label="Ativo" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewConta" />
                 <DataTable :value="contasStore.contas">
                     <Column field="nome" header="Nome"></Column>
                     <Column field="banco.nome" header="Banco"></Column>
+                    <Column field="tipo" header="Tipo"></Column>
                     <Column :exportable="false" style="min-width:5rem">
                         <template #body="slotProps">
+                            <Button icon="pi pi-eye" outlined rounded class="mr-2" severity="secondary"
+                                @click="abretransacoes(slotProps)" />
                             <Button icon="pi pi-pencil" outlined severity="secondary" rounded class="mr-2"
                                 @click="editConta(slotProps)" />
-                            <Button icon="pi pi-trash" rounded severity="secondary"
+                            <Button icon="pi pi-trash" outlined rounded class="mr-2" severity="secondary"
                                 @click="confirmDeleteConta(slotProps)" />
+
                         </template>
                     </Column>
                 </DataTable>
             </TabPanel>
 
-            <TabPanel header="Cartões" :disabled="false">
+            <!-- <TabPanel header="Cartões" :disabled="false">
                 <Button label="Cartão" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewCartao" />
                 <DataTable :value="cartoesStore.cartoes">
                     <Column field="nome" header="Nome"></Column>
@@ -31,11 +35,13 @@
                         </template>
                     </Column>
                 </DataTable>
-            </TabPanel>
-            <TabPanel header="Documentos" :disabled="false">
+            </TabPanel> -->
+            <TabPanel header="Transações" :disabled="false">
+                <div>
+                    <Button label="Transações" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewDoc" />
+                </div>
                 <div>
                     <!-- <Button @click="handleCSVUpload" label="Importar CSV" icon="pi pi-upload" iconPos="right" /> -->
-
                     <!-- <FileUpload mode="basic" name="demo[]" accept=".csv" @select="handleCSVUpload" @upload="onUpload" /> -->
                     <FileUpload mode="basic" chooseLabel="Subir CSV" accept=".csv" :auto="true" :customUpload="true"
                         @uploader="handleCSVUpload" />
@@ -44,26 +50,6 @@
                 <div>
                     <FileUpload mode="basic" chooseLabel="Subir OFX" accept=".ofx" :auto="true" :customUpload="true"
                         @uploader="handleOFXUpload" />
-                </div>
-                <div class="">
-
-                    <DataTable v-if="tableData.length" :value="tableData" tableStyle="min-width: 50rem">
-
-                        <Column field="date" header="Data"></Column>
-                        <Column field="descricao" header="Descrição"></Column>
-                        <!--  <Column field="parcela" header="Parcela"></Column>
-  <Column field="cidade" header="Cidade"></Column>
-  <Column field="pais" header="País"></Column>
-  <Column field="valorusd" header="Valor usd"></Column>
-  -->
-                        <Column field="valor" class="valor" style="text-align: right;">
-                            <template #header>
-                                <div style="min-width: 100%">Valor (R$)</div>
-                            </template>
-                        </Column>
-
-                    </DataTable>
-
                 </div>
 
             </TabPanel>
@@ -78,12 +64,16 @@
                     :invalid="submitted && !contaDoDialog.nome" class="md:w-80 w-full" />
                 <small class="p-error" v-if="submitted && !contaDoDialog.nome">Esse campo não pode ficar em
                     branco</small>
-
             </div>
             <div class="field">
                 <label for="Banco">Banco</label>
                 <Select id="Banco" v-model="contaDoDialog.banco" :options="contasStore.modelosbancos" optionLabel="nome"
                     placeholder="Selecione um banco" class="md:w-80 w-full" />
+            </div>
+            <div class="field">
+                <label for="Tipo">Tipo</label>
+                <Select id="Tipo" v-model="contaDoDialog.tipo" :options="tipos" placeholder="Selecione um banco"
+                    class="md:w-80 w-full" />
             </div>
 
             <template #footer>
@@ -105,8 +95,58 @@
             </template>
         </Dialog>
 
-        <!-- Dialog for cartoes -->
-        <Dialog v-model:visible="displayCartaoDialog" :style="{ width: '450px' }" header="Nova Cartão" :modal="true"
+        <!-- Dialog for Documentos -->
+        <Dialog v-model:visible="displayDocDialog" header="Novo Documento" :modal="true" class="p-fluid">
+
+            <div class="field">
+                <label for="Documento">Ativo</label>
+                <Select id="Documento" v-model="docDoDialog.ativo" :options="contasStore.contas" option-label="nome"
+                    placeholder="Selecione um ativo" class="md:w-80 w-full" />
+            </div>
+
+            <!-- <div class="field">
+                <label for="data" class="block">Data</label>
+                <DatePicker v-model="docDoDialog.data" id="data" view="month" dateFormat="mm/yy" />
+                <small class="p-error" v-if="submitted && !docDoDialog.data">Esse campo não pode ficar em
+                    branco</small>
+            </div> -->
+            <div>
+                <FileUpload mode="basic" chooseLabel="Documento" accept=".csv,.ofx" :auto="true" :customUpload="true"
+                    @uploader="handleFileUpload" />
+            </div>
+
+            <div class="">
+
+                <DataTable v-if="tableData.length" :value="tableData" tableStyle="min-width: 50rem">
+
+                    <Column field="date" header="Data"></Column>
+                    <Column field="descricao" header="Descrição"></Column>
+                    <!--  <Column field="parcela" header="Parcela"></Column>
+<Column field="cidade" header="Cidade"></Column>
+<Column field="pais" header="País"></Column>
+<Column field="valorusd" header="Valor usd"></Column>
+-->
+                    <Column field="valor" class="valor" style="text-align: right;">
+                        <template #header>
+                            <div style="min-width: 100%">Valor (R$)</div>
+                        </template>
+                    </Column>
+                </DataTable>
+            </div>
+            <!-- <div class="field">
+                <label for="Documento">Nome</label>
+                <InputText id="Documento" v-model.trim="docDoDialog.nome" required="true" autofocus
+                    :invalid="submitted && !docDoDialog.nome" class="md:w-80 w-full" />
+                <small class="p-error" v-if="submitted && !docDoDialog.nome">Esse campo não pode ficar em
+                    branco</small>
+            </div> -->
+            <template #footer>
+                <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogDoc" />
+                <Button label="Salvar" icon="pi pi-check" text @click="salvarDoc" />
+            </template>
+        </Dialog>
+
+        <!-- <Dialog v-model:visible="displayCartaoDialog" :style="{ width: '450px' }" header="Nova Cartão" :modal="true"
             class="p-fluid">
             <div class="field">
                 <label for="Conta">Nome</label>
@@ -139,7 +179,7 @@
                 <Button label="Não" icon="pi pi-times" text @click="deleteCartaoDialog = false" />
                 <Button label="Sim" icon="pi pi-check" text @click="removeCartao(cartaoDoDialog)" />
             </template>
-        </Dialog>
+        </Dialog> -->
 
     </div>
 </template>
@@ -154,6 +194,7 @@ import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Select from 'primevue/select';
 import Column from 'primevue/column';
+import DatePicker from 'primevue/datepicker';
 import { useContasStore } from '@/stores/contasStore';
 import { useCartoesStore } from '@/stores/cartoesStore';
 import { useUserStore } from "@/stores/user";
@@ -164,6 +205,10 @@ import FileUpload from 'primevue/fileupload';
 import * as txml from 'txml';
 
 import { onBeforeMount } from 'vue';
+
+import router from "../router";
+
+const tipos = ref(['Conta Corrente', 'Poupança', 'Investimento', 'Cartão de Crédito', 'Outros']);
 
 const contasStore = useContasStore();
 const cartoesStore = useCartoesStore();
@@ -177,6 +222,14 @@ const displayCartaoDialog = ref(false);
 const contaDoDialog = ref({});
 const cartaoDoDialog = ref({});
 const submitted = ref(false);
+
+const abretransacoes = (node) => {
+    console.log('abretransacoes', node);
+    router.push("/ativo/" + node.index);
+    // submitted.value = false;
+    // contaDoDialog.value = { ...node.data };
+    // displayContaDialog.value = true;
+};
 
 const loadContasECartoes = () => {
     contasStore.loadContas(userStore.user.id);
@@ -193,6 +246,16 @@ const openNewConta = () => {
     contaDoDialog.value = {};
     submitted.value = false;
     displayContaDialog.value = true;
+};
+
+const displayDocDialog = ref(false);
+const docDoDialog = ref({});
+
+const openNewDoc = () => {
+
+    docDoDialog.value = {};
+    submitted.value = false;
+    displayDocDialog.value = true;
 };
 
 const editConta = (node) => {
@@ -241,6 +304,8 @@ const salvarConta = () => {
         ehEdit.value = false;
     }
 };
+
+
 
 const hideDialogConta = () => {
     displayContaDialog.value = false;
@@ -307,6 +372,20 @@ const hideDialogCartao = () => {
     ehEdit.value = false;
 };
 
+const salvarDoc = () => {
+    submitted.value = true;
+    if (docDoDialog.value.nome) {
+        console.log('docDoDialog.value', docDoDialog.value);
+        console.log('userStore.user.uid', userStore.user.id);
+
+    }
+};
+
+const hideDialogDoc = () => {
+    displayDocDialog.value = false;
+    docDoDialog.value = {};
+};
+
 
 
 
@@ -329,9 +408,21 @@ const tableData = ref([]);
   console.log('teste33')
 } */
 
+const handleFileUpload = (event) => {
+    console.log(event.files[0])
+    // a depender da extensao do arquivo, chama a funcao correspondente para tratar o arquivo
+    const file = event.files[0];
+    const ext = file.name.split('.').pop();
+    if (ext == 'csv') {
+        handleCSVUpload(event);
+    } else if (ext == 'ofx') {
+        handleOFXUpload(event);
+    }
+};
 
 const handleCSVUpload = (event) => {
     console.log(event.files[0])
+
     const file = event.files[0];
     const reader = new FileReader();
     reader.onload = (e) => {

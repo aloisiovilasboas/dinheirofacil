@@ -9,6 +9,7 @@ import Sementes from "@/views/Sementes.vue";
 import Producao from "@/views/Producao.vue";
 import Painel from "../views/Painel.vue";
 import Perfil from "../views/Perfil.vue";
+import Ativo from "../views/Ativo.vue";
 
 import { useLoadingStore } from "../stores/loading";
 import { useUsuariosStore } from "../stores/usuarios";
@@ -52,6 +53,14 @@ const router = createRouter({
       path: "/Sementes",
       name: "Sementes",
       component: Sementes,
+      meta: { requiresAdmin: true },
+    },
+
+    {
+      path: "/ativo/:id",
+      name: "ativo",
+      component: Ativo,
+      props: true,
       meta: { requiresAdmin: true },
     },
 
