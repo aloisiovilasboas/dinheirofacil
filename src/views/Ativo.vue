@@ -61,13 +61,27 @@
                 </Column>
                 <Column field="categoria" header="Categoria">
 
-                    <template #body="rowData">
-                        <!-- {{ rowData.data }} -->
-                        {{ categoriasStore.categorias }}
-                        <TreeSelect value="rowData.categoria" :options="categoriasStore.categorias"
-                            placeholder="Select Item" class="md:w-80 w-full">
-                            <template #options>
-                                <span>{{ "asd" }}</span>
+                    <template #body="{ data }">
+
+                        <!-- {{ categoriasStore.categorias }} -->
+                        <TreeSelect v-model="data.categoria" @node-select="onNodeSelect(data, $event)"
+                            :options="categoriasStore.categorias" placeholder="Select Item" class="md:w-80 w-full">
+                            <template #option="{ node }">
+                                <div class="flex-row">
+                                    <!-- Conteúdo customizado de teste -->
+                                    <div>
+                                        {{ node.label }}
+                                    </div>
+                                    <div v-if="node.filtro" class="flex flex-row gap-1 align-items-center">
+                                        <!-- {{ slotProps.data.filtros }} -->
+
+                                        <Badge v-for="filter of node.filtro" :key="filter"
+                                            :severity="getSeverity(filter)" :value="filter.filtro">
+                                        </Badge>
+
+                                    </div>
+                                </div>
+
                             </template>
 
                             <template #footer>
@@ -112,6 +126,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
+import Badge from 'primevue/badge';
 import Select from 'primevue/select';
 import FileUpload from 'primevue/fileupload';
 
@@ -125,8 +140,21 @@ const filtrosStore = useFiltrosStore();
 import { useUserStore } from '@/stores/user';
 const userStore = useUserStore();
 
+const tempdel = ref({});
+
+const onNodeSelect = (rowData, event) => {
+    /*  console.log('tempdel:', tempdel); // Teste para ver o conteúdo do evento */
+    console.log('Evento node-select:', event); // Teste para ver o conteúdo do evento
+    console.log('rowData:', rowData); // Teste para ver o conteúdo do rowData 
+    if (event && event.node) {
+        rowData.categoria = { ...event }; // Armazena o nó completo em categoria
+    }
+}
+
+
 
 const categoriasStore = useCategoriasStore();
+
 
 import { ref } from 'vue';
 
@@ -138,6 +166,29 @@ const submitted = ref(false);
 
 const displayDocDialog = ref(false);
 const docDoDialog = ref({});
+
+
+const getSeverity = (filtro) => {
+    console.log('filtro');
+    console.log(filtro.tipoFiltro);
+    switch (filtro.tipoFiltro) {
+        case 'Valor':
+            {
+                console.log('valor');
+                return 'warn';
+            }
+
+
+        case 'Descricao':
+            return 'secondary';
+
+        case 'Data':
+            return 'warn';
+
+        default:
+            return null;
+    }
+};
 
 const openNewDoc = () => {
 
@@ -225,7 +276,7 @@ const handleOFXUpload = (event) => {
                 rowData['id'] = transacoes[i].children[3].children[0]
                 rowData['descricao'] = transacoes[i].children[4].children[0]
                 rowData['tipo'] = transacoes[i].children[0].children[0]
-                rowData['Categoria'] = { id: 1, nome: 'teste' }
+                rowData['categoria'] = {}
                 data.push(rowData)
             }
         }

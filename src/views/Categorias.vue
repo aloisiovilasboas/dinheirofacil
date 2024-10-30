@@ -72,84 +72,134 @@
                 </div>
 
                 <div class="card flex flex-column md:flex-row gap-3">
-                    <h4>Filtros</h4>
+                    <!-- <h4>Filtros</h4> -->
+                    <div v-if="filtrosNovaTag && filtrosNovaTag.length > 0">
+                        <DataTable :value="filtrosNovaTag
+                            ">
+                            <Column field="nome" header="Filtros"></Column>
+                            <Column field="criteriosDoFiltro" header="Critérios">
+                                <template #body="slotProps">
+                                    <div v-for="criterio of slotProps.data.criteriosDoFiltro">
+                                        <Badge :severity="getSeverity(criterio)" :value="criterio.label" />
+                                    </div>
+                                </template>
+                            </Column>
+                            <Column :exportable="false" style="min-width:5rem">
+                                <template #body="slotProps">
+                                    <Button icon="pi pi-pencil" outlined severity="secondary" rounded class="mr-2"
+                                        @click="editFiltro(slotProps.data, slotProps.index)" />
+                                    <Button icon="pi pi-trash" rounded severity="secondary"
+                                        @click="removeFiltro(slotProps.data)" />
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </div>
 
-                    <Button v-for="filter of filtrosNovaTag" :key="filter.filtro" :severity="getSeverity(filter)"
-                        :label="filter.filtro" rounded icon="pi pi-times-circle" iconPos="right" size="small"
-                        @click="deleteFiltro(filter.filtro)" />
 
                 </div>
 
 
                 <div class="card flex justify-content-center">
-                    <Button label="Filtro" icon="pi pi-plus" @click="showfiltroCategDialog = true" />
+                    <Button label="Filtro" icon="pi pi-plus" @click="novoFiltroCateg()" />
                     <Dialog v-model:visible="showfiltroCategDialog" modal :style="{ width: '50vw' }">
+                        <div>
+                            <div class="field">
 
-
-                        <div class="field">
-                            <label for="Categoria">Tipo do Filtro</label>
-                            <div class="flex align-items-center">
-                                <RadioButton v-model="tipoFiltro" inputId="descricaoradio" name="descricaoradio"
-                                    value="Descrição" />
-                                <label for="descricaoradio" class="ml-2">Descrição</label>
-                            </div>
-                            <div class="flex align-items-center">
-                                <RadioButton v-model="tipoFiltro" inputId="valorradio" name="valorradio"
-                                    value="Valor" />
-                                <label for="valorradio" class="ml-2">Valor</label>
-                            </div>
-                            <div class="flex align-items-center">
-                                <RadioButton v-model="tipoFiltro" inputId="dataradio" name="dataradio" value="Data" />
-                                <label for="dataradio" class="ml-2">Data</label>
-                            </div>
-                        </div>
-
-                        <div v-if="tipoFiltro == 'Descrição'" class="field">
-
-
-
-
-                            <div v-if="tipoFiltro == 'Descrição'" class="field">
-                                <label for="Categoria">Termo da transação</label>
-                                <InputText id="nomeNovoFiltro" v-model.trim="filtroDescricao" required="true" autofocus
-                                    :invalid="submitted && !filtroDescricao" class="md:w-80 w-full" />
-                                <small class="p-error" v-if="submitted && !filtroDescricao">Esse campo não pode ficar em
+                                <label for="nomedialogFiltro">Nome</label>
+                                <InputText id="nomedialogFiltro" v-model.trim="filtroDoDialogCateg.nome" required="true"
+                                    autofocus :invalid="submitted && !filtroDescricao" class="md:w-80 w-full" />
+                                <small class="p-error" v-if="submitted && !filtroDescricao">Esse campo não pode
+                                    ficar em
                                     branco</small>
                             </div>
+                            <div class="field">
 
 
+                                <Card v-for="criterio in filtroDoDialogCateg.criteriosDoFiltro" class="cardPlantio">
+                                    <template #header>
+                                        <div class="p-d-flex p-jc-between ">
+
+                                            <Button icon="pi pi-times" class="p-button-rounded  p-button-contrast"
+                                                @click="removecriterio(criterio)" aria-label="Filter" />
+                                        </div>
+                                    </template>
+                                    <template template #content>
+
+                                        <div class="field">
+                                            <label for="Categoria">Tipo do Filtro</label>
+                                            <div class="flex align-items-center">
+                                                <RadioButton v-model="criterio.tipoFiltro" inputId="descricaoradio"
+                                                    name="descricaoradio" value="Descrição" />
+                                                <label for="descricaoradio" class="ml-2">Descrição</label>
+                                            </div>
+                                            <div class="flex align-items-center">
+                                                <RadioButton v-model="criterio.tipoFiltro" inputId="valorradio"
+                                                    name="valorradio" value="Valor" />
+                                                <label for="valorradio" class="ml-2">Valor</label>
+                                            </div>
+                                            <div class="flex align-items-center">
+                                                <RadioButton v-model="criterio.tipoFiltro" inputId="dataradio"
+                                                    name="dataradio" value="Data" />
+                                                <label for="dataradio" class="ml-2">Data</label>
+                                            </div>
+                                        </div>
+
+                                        <div v-if="criterio.tipoFiltro == 'Descrição'" class="field">
+                                            <div v-if="criterio.tipoFiltro == 'Descrição'" class="field">
+                                                <label for="nomeNovoFiltro">Termo da transação</label>
+                                                <InputText id="nomeNovoFiltro" v-model.trim="criterio.filtroDescricao"
+                                                    required="true" autofocus
+                                                    :invalid="submitted && !criterio.filtroDescricao"
+                                                    class="md:w-80 w-full" />
+                                                <small class="p-error"
+                                                    v-if="submitted && !criterio.filtroDescricao">Esse campo
+                                                    não
+                                                    pode
+                                                    ficar em
+                                                    branco</small>
+                                            </div>
+
+
+                                        </div>
+                                        <div v-if="criterio.tipoFiltro == 'Valor'" class="flex flex-column gap-3">
+
+
+                                            <div class="flex flex-row gap-3">
+                                                <label for="Categoria">Menor que</label>
+                                                <InputText id="valorMenorq" v-model="criterio.valorMenorque" />
+                                            </div>
+
+                                            <div class="flex flex-row gap-3">
+                                                <label for="Categoria">Maior que</label>
+                                                <InputText id="valorMaiorque" v-model="criterio.valorMaiorque" />
+                                            </div>
+
+
+                                        </div>
+                                        <div v-if="criterio.tipoFiltro == 'Data'" class="flex flex-column gap-3">
+
+
+                                            <div class="flex flex-row gap-3">
+                                                <label for="Categoria">Anterior ao dia</label>
+                                                <InputText id="diaMenorQ" v-model="criterio.diaMenorQue" />
+                                            </div>
+
+                                            <div class="flex flex-row gap-3">
+                                                <label for="Categoria">Depois do dia</label>
+                                                <InputText id="diaMaiorQ" v-model="criterio.diaMaiorQue" />
+                                            </div>
+                                        </div>
+                                    </template>
+                                </Card>
+                            </div>
                         </div>
-                        <div v-if="tipoFiltro == 'Valor'" class="flex flex-column gap-3">
-
-
-                            <div class="flex flex-row gap-3">
-                                <label for="Categoria">Menor que</label>
-                                <InputText id="valorMenorq" v-model="valorMenorque" />
-                            </div>
-
-                            <div class="flex flex-row gap-3">
-                                <label for="Categoria">Maior que</label>
-                                <InputText id="valorMaiorque" v-model="valorMaiorque" />
-                            </div>
-
-
-                        </div>
-                        <div v-if="tipoFiltro == 'Data'" class="flex flex-column gap-3">
-
-
-                            <div class="flex flex-row gap-3">
-                                <label for="Categoria">Anterior ao dia</label>
-                                <InputText id="diaMenorQ" v-model="diaMenorQue" />
-                            </div>
-
-                            <div class="flex flex-row gap-3">
-                                <label for="Categoria">Depois do dia</label>
-                                <InputText id="diaMaiorQ" v-model="diaMaiorQue" />
-                            </div>
+                        <div class="center">
+                            <Button icon="pi pi-plus" label="Adicionar Critério" rounded outlined aria-label="Filter"
+                                @click="addCriteriosDoFiltro" />
                         </div>
 
-
-                        <Button label="Salvar" icon="pi pi-save" @click=addFiltro() />
+                        <Button :disabled="!filtroDoDialogCateg.criteriosDoFiltro.length > 0" label="Salvar"
+                            icon="pi pi-save" @click=salvarCriterios() />
                     </Dialog>
                 </div>
 
@@ -170,7 +220,7 @@
 
 
 
-            <Dialog v-model:visible="displayfiltrosDialog" :style="{ width: '450px' }" header="Nova categoria"
+            <!-- <Dialog v-model:visible="displayfiltrosDialog" :style="{ width: '450px' }" header="Nova categoria"
                 :modal="true" class="p-fluid">
                 <div class="field">
                     <label for="Filtro">Nome</label>
@@ -196,7 +246,7 @@
                     <Button label="Salvar" icon="pi pi-check" text @click="salvarFiltro" />
                 </template>
 
-            </Dialog>
+            </Dialog> -->
 
             <Dialog v-model:visible="deleteCategoriaDialog" :style="{ width: '450px' }" header="Confirmar"
                 :modal="true">
@@ -211,7 +261,7 @@
                 </template>
             </Dialog>
 
-            <Dialog v-model:visible="deleteFiltroDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
+            <!-- <Dialog v-model:visible="deleteFiltroDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
                 <div class="confirmation-content">
                     <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
                     <span v-if="filtrododialog">Tem certeza que deseja deletar <b>{{ filtrododialog.nome
@@ -221,9 +271,10 @@
                     <Button label="Não" icon="pi pi-times" text @click="deleteFiltroDialog = false" />
                     <Button label="Sim" icon="pi pi-check" text @click="removeFilter(filtrododialog)" />
                 </template>
-            </Dialog>
+            </Dialog> -->
 
         </div>
+
 
     </div>
 
@@ -250,6 +301,8 @@ const selectedParentCategoryKey = ref(null);
 
 const showfiltroCategDialog = ref(false);
 
+/* 
+
 const tipoFiltro = ref();
 const filtroDescricao = ref('');
 
@@ -258,7 +311,7 @@ const valorMaiorque = ref('');
 
 const diaMenorQue = ref('')
 
-const diaMaiorQue = ref('')
+const diaMaiorQue = ref('') */
 const filtrosNovaTag = ref([])
 
 
@@ -277,13 +330,26 @@ import DataTable from 'primevue/datatable';
 
 import Badge from "primevue/badge";
 
+const filtroDoDialogCateg = ref({ criteriosDoFiltro: [{}] });
 
+
+const addCriteriosDoFiltro = () => {
+    filtroDoDialogCateg.value.criteriosDoFiltro.push({});
+};
+
+const removecriterio = (criterio) => {
+    filtroDoDialogCateg.value.criteriosDoFiltro = filtroDoDialogCateg.value.criteriosDoFiltro.filter(p => p !== criterio);
+};
+
+const removeFiltro = (filtro) => {
+    filtrosNovaTag.value = filtrosNovaTag.value.filter(p => p !== filtro);
+};
 
 const categoriasStore = useCategoriasStore();
 const filtrosStore = useFiltrosStore();
 
 const displaycategDialog = ref(false);
-const categdodialog = ref({});
+const categdodialog = ref({ filtros: [] });
 const filtrododialog = ref({});
 const submitted = ref(false);
 const ehEdit = ref(false);
@@ -292,14 +358,27 @@ const deleteCategoriaDialog = ref(false);
 
 const displayfiltrosDialog = ref(false);
 
+const ehEditFiltro = ref(false);
 
+const editFiltro = (filtro, index) => {
+    indexEditFiltro.value = index
+    ehEditFiltro.value = true;
+    filtroDoDialogCateg.value = { ...filtro };
+    showfiltroCategDialog.value = true;
+};
+
+const novoFiltroCateg = () => {
+    ehEditFiltro.value = false;
+    filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] };
+    showfiltroCategDialog.value = true;
+};
 
 const editCategoria = (categoria) => {
 
     const pai = findParentNode(categoriasStore.categorias, categoria.key);
     ehEdit.value = true;
     categdodialog.value = { ...categoria };
-    filtrosNovaTag.value = categoria.filtro;
+    filtrosNovaTag.value = categoria.filtros;
 
     displaycategDialog.value = true;
 
@@ -313,7 +392,7 @@ const editCategoria = (categoria) => {
 
 
 };
-
+/* 
 const editFiltro = (filtro) => {
     const catKey = filtro.categoria.key;
     console.log(catKey);
@@ -328,13 +407,13 @@ const editFiltro = (filtro) => {
     }
     displayfiltrosDialog.value = true;
 };
-
+ */
 
 const confirmDeleteCateg = (categoria) => {
     categdodialog.value = { ...categoria };
     deleteCategoriaDialog.value = true;
 };
-
+/* 
 const confirmDeleteFiltro = (filtro) => {
     const catKey = filtro.categoria.key;
     console.log(catKey);
@@ -349,23 +428,27 @@ const confirmDeleteFiltro = (filtro) => {
     }
     deleteFiltroDialog.value = true;
 };
-
+ */
 
 
 const openNewCategoria = () => {
+
     ehEdit.value = false;
     categdodialog.value = {};
+    filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] };
     selectedParentCategoryKey.value = null;
     submitted.value = false;
     displaycategDialog.value = true;
-};
+    filtrosNovaTag.value = []
 
+};
+/* 
 const openNewFiltro = () => {
     ehEdit.value = false;
     filtrododialog.value = {};
     submitted.value = false;
     displayfiltrosDialog.value = true;
-};
+}; */
 
 const categValida = () => {
     if (selectedParentCategoryKey.value !== null) {
@@ -375,7 +458,7 @@ const categValida = () => {
     return categdodialog.value.label;
 };
 
-
+/* 
 const filtroValido = () => {
     if (filtrododialog.value.nome && filtrododialog.value.termo && filtrododialog.value.categoria) {
         return true;
@@ -383,8 +466,9 @@ const filtroValido = () => {
         return false;
     }
 };
-
+ */
 const hideDialogCateg = () => {
+
     displaycategDialog.value = false;
     submitted.value = false;
     categdodialog.value = {};
@@ -392,7 +476,9 @@ const hideDialogCateg = () => {
     ehEdit.value = false;
     displayfiltrosDialog.value = false;
     filtrododialog.value = {};
+    filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] };
     submitted.value = false;
+    filtrosNovaTag.value = []
 
     filtrosNovaTag.value = []
 
@@ -405,7 +491,7 @@ const salvarCateg = () => {
         if (ehEdit.value) {
             console.log('editando');
             console.log(categdodialog.value);
-            let newCategory = { key: categdodialog.value.key, label: categdodialog.value.label, value: categdodialog.value.label, filtro: filtrosNovaTag.value };
+            let newCategory = { key: categdodialog.value.key, label: categdodialog.value.label, value: categdodialog.value.label, filtros: filtrosNovaTag.value };
             categoriasStore.updateCategory(userStore.user.id, newCategory);
         } else {
 
@@ -413,7 +499,7 @@ const salvarCateg = () => {
             let parentKey = selectedParentCategoryKey.value ? Object.keys(selectedParentCategoryKey.value)[0] : null;
             let newCategory = {
                 key: Date.now(), label: categdodialog.value.label, value: categdodialog.value.label
-                , filtro: filtrosNovaTag.value
+                , filtros: filtrosNovaTag.value
             };
             categoriasStore.addCategory(userStore.user.id, newCategory, parentKey);
         }
@@ -433,7 +519,7 @@ const salvarCateg = () => {
 
 
 };
-
+/* 
 const salvarFiltro = () => {
     submitted.value = true;
     if (filtroValido()) {
@@ -462,7 +548,7 @@ const salvarFiltro = () => {
 
     // salva novaespec no banco e fecha o dialog
 };
-
+ */
 const encontraCategoriaPeloKey = (categorias, key) => {
     for (const categoria of categorias) {
         // transforma para string para comparar
@@ -480,13 +566,13 @@ const encontraCategoriaPeloKey = (categorias, key) => {
 
 const loadCategoriasEFiltros = async () => {
     console.log(userStore.user.id);
-    await filtrosStore.loadFiltros(userStore.user.id);
+    /* await filtrosStore.loadFiltros(userStore.user.id); */
     await categoriasStore.loadCategories(userStore.user.id);
     console.log(categoriasStore.categorias);
 };
 
 // Função para remover uma categoria específica
-
+/* 
 const removeFilter = async (node) => {
     console.log('removendo');
     console.log(node);
@@ -494,7 +580,7 @@ const removeFilter = async (node) => {
     deleteFiltroDialog.value = false;
 
 };
-
+ */
 const removeCategory = async (node) => {
     console.log('removendo');
     console.log(node.key);
@@ -532,7 +618,107 @@ onBeforeMount(() => {
     loadCategoriasEFiltros();
 });
 
+const indexEditFiltro = ref({})
 
+
+const salvarCriterios = () => {
+    if (ehEditFiltro.value) {
+        console.log('editando');
+        console.log(filtroDoDialogCateg.value);
+        var novoFiltro = trataCriterios()
+        filtrosNovaTag.value[indexEditFiltro.value] = novoFiltro
+
+    } else {
+        addCriterios()
+    }
+    showfiltroCategDialog.value = false
+    filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] }
+    console.log(filtrosNovaTag.value);
+};
+
+const trataCriterios2 = (criterios) => {
+    var criteriosTratados = []
+    criterios.forEach(criterio => {
+        criteriosTratados.push(addCriterio(criterio))
+    });
+    return criteriosTratados
+};
+
+
+const trataCriterios = () => {
+    // percorre filtroDoDialogCateg.criteriosDoFiltro e adiciona no filtrosNovaTag
+    console.log(filtroDoDialogCateg.value.criteriosDoFiltro);
+    var novoFiltro = { nome: filtroDoDialogCateg.value.nome, criteriosDoFiltro: [] }
+    filtroDoDialogCateg.value.criteriosDoFiltro.forEach(criterio => {
+
+        novoFiltro.criteriosDoFiltro.push(addCriterio(criterio))
+
+    });
+
+    return novoFiltro
+    /*  showfiltroCategDialog.value = false
+     filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] } */
+
+
+};
+
+const addCriterios = () => {
+    // percorre filtroDoDialogCateg.criteriosDoFiltro e adiciona no filtrosNovaTag
+    console.log(filtroDoDialogCateg.value.criteriosDoFiltro);
+    var novoFiltro = { nome: filtroDoDialogCateg.value.nome, criteriosDoFiltro: [] }
+    filtroDoDialogCateg.value.criteriosDoFiltro.forEach(criterio => {
+
+        novoFiltro.criteriosDoFiltro.push(addCriterio(criterio))
+
+    });
+
+    filtrosNovaTag.value.push(novoFiltro)
+    /*  showfiltroCategDialog.value = false
+     filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] } */
+
+
+};
+
+const addCriterio = (criterio) => {
+    var f = { tipoFiltro: criterio.tipoFiltro, label: '' }
+
+    if (criterio.tipoFiltro == 'Valor') {
+        f.label = ''
+        if (criterio.valorMaiorque !== '' && criterio.valorMaiorque !== undefined) {
+            f.label = f.label + criterio.valorMaiorque + '<'
+            f.valorMaiorque = criterio.valorMaiorque
+        }
+        f.label = f.label + 'Valor'
+        if (criterio.valorMenorque !== '' && criterio.valorMenorque !== undefined) {
+            f.label = f.label + '<' + criterio.valorMenorque
+            f.valorMenorque = criterio.valorMenorque
+        }
+
+
+    } else if (criterio.tipoFiltro == 'Data') {
+
+        f.label = ''
+        if (criterio.diaMaiorQue !== '' && criterio.diaMaiorQue !== undefined) {
+            f.label = f.label + criterio.diaMaiorQue + '<'
+            f.diaMaiorQue = criterio.diaMaiorQue
+        }
+        f.label = f.label + 'Data'
+        if (criterio.diaMenorQue !== '' && criterio.diaMenorQue !== undefined) {
+            f.label = f.label + '<' + criterio.diaMenorQue
+            f.diaMenorQue = criterio.diaMenorQue
+        }
+
+    }
+    else if (criterio.tipoFiltro == 'Descrição') {
+        if (criterio.filtroDescricao !== '' && criterio.filtroDescricao !== undefined) {
+            f.label = criterio.filtroDescricao
+            f.filtroDescricao = criterio.filtroDescricao
+        }
+
+    }
+    return f
+};
+/* 
 const addFiltro = () => {
     var f = { tipoFiltro: tipoFiltro.value, filtro: '' }
 
@@ -570,7 +756,7 @@ const addFiltro = () => {
     filtroDescricao.value = ''
     filtrosNovaTag.value.push(f)
     showfiltroCategDialog.value = false
-}
+} */
 
 const getSeverity = (filtro) => {
     console.log('filtro');
@@ -593,12 +779,12 @@ const getSeverity = (filtro) => {
             return null;
     }
 };
-
+/* 
 const deleteFiltro = (filtro) => {
     const index = filtrosNovaTag.value.findIndex(obj => obj.filtro === filtro);
     if (index > -1) {
         filtrosNovaTag.value.splice(index, 1);
     }
 }
-
+ */
 </script>
