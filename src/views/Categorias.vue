@@ -54,8 +54,8 @@
             </TabPanel> -->
         </TabView>
         <div>
-            <Dialog v-model:visible="displaycategDialog" :style="{ width: '450px' }" header="Nova categoria"
-                :modal="true" class="p-fluid">
+            <Dialog v-model:visible="displaycategDialog" :style="{ width: '450px' }" header="Categoria" :modal="true"
+                class="p-fluid">
                 <div class="field">
                     <label for="Categoria">Nome</label>
                     <InputText id="Categoria" v-model.trim="categdodialog.label" required="true" autofocus
@@ -392,44 +392,11 @@ const editCategoria = (categoria) => {
 
 
 };
-/* 
-const editFiltro = (filtro) => {
-    const catKey = filtro.categoria.key;
-    console.log(catKey);
-    let cat = encontraCategoriaPeloKey(categoriasStore.categorias, catKey);
-    console.log('cat', cat);
-    ehEdit.value = true;
-    filtrododialog.value = { ...filtro };
-    if (cat) {
-        filtrododialog.value.categoria = { [cat.key]: true };
-    } else {
-        filtrododialog.value.categoria = null;
-    }
-    displayfiltrosDialog.value = true;
-};
- */
 
 const confirmDeleteCateg = (categoria) => {
     categdodialog.value = { ...categoria };
     deleteCategoriaDialog.value = true;
 };
-/* 
-const confirmDeleteFiltro = (filtro) => {
-    const catKey = filtro.categoria.key;
-    console.log(catKey);
-    let cat = encontraCategoriaPeloKey(categoriasStore.categorias, catKey);
-    console.log('cat', cat);
-
-    filtrododialog.value = { ...filtro };
-    if (cat) {
-        filtrododialog.value.categoria = { [cat.key]: true };
-    } else {
-        filtrododialog.value.categoria = null;
-    }
-    deleteFiltroDialog.value = true;
-};
- */
-
 
 const openNewCategoria = () => {
 
@@ -442,14 +409,6 @@ const openNewCategoria = () => {
     filtrosNovaTag.value = []
 
 };
-/* 
-const openNewFiltro = () => {
-    ehEdit.value = false;
-    filtrododialog.value = {};
-    submitted.value = false;
-    displayfiltrosDialog.value = true;
-}; */
-
 const categValida = () => {
     if (selectedParentCategoryKey.value !== null) {
         console.log(selectedParentCategoryKey.value);
@@ -458,15 +417,6 @@ const categValida = () => {
     return categdodialog.value.label;
 };
 
-/* 
-const filtroValido = () => {
-    if (filtrododialog.value.nome && filtrododialog.value.termo && filtrododialog.value.categoria) {
-        return true;
-    } else {
-        return false;
-    }
-};
- */
 const hideDialogCateg = () => {
 
     displaycategDialog.value = false;
@@ -519,36 +469,6 @@ const salvarCateg = () => {
 
 
 };
-/* 
-const salvarFiltro = () => {
-    submitted.value = true;
-    if (filtroValido()) {
-        let catKey = filtrododialog.value.categoria ? Object.keys(filtrododialog.value.categoria)[0] : null;
-        let cataux = encontraCategoriaPeloKey(categoriasStore.categorias, catKey);
-        let cat = { key: cataux.key, label: cataux.label };
-        console.log('cat');
-        console.log(cat);
-        if (ehEdit.value) {
-            console.log('editando');
-            let newFiltro = { key: filtrododialog.value.key, nome: filtrododialog.value.nome, termo: filtrododialog.value.termo, categoria: cat };
-            console.log(newFiltro);
-            filtrosStore.updateFiltro(userStore.user.id, newFiltro);
-        } else {
-            console.log('salvando');
-            let newFiltro = { key: Date.now(), nome: filtrododialog.value.nome, termo: filtrododialog.value.termo, categoria: cat };
-            console.log(newFiltro);
-            filtrosStore.addFiltro(userStore.user.id, newFiltro);
-        }
-        displayfiltrosDialog.value = false;
-        filtrododialog.value = {};
-        submitted.value = false;
-    } else {
-        console.log('erro');
-    }
-
-    // salva novaespec no banco e fecha o dialog
-};
- */
 const encontraCategoriaPeloKey = (categorias, key) => {
     for (const categoria of categorias) {
         // transforma para string para comparar
@@ -571,16 +491,6 @@ const loadCategoriasEFiltros = async () => {
     console.log(categoriasStore.categorias);
 };
 
-// Função para remover uma categoria específica
-/* 
-const removeFilter = async (node) => {
-    console.log('removendo');
-    console.log(node);
-    await filtrosStore.deleteFiltro(userStore.user.id, node.key);
-    deleteFiltroDialog.value = false;
-
-};
- */
 const removeCategory = async (node) => {
     console.log('removendo');
     console.log(node.key);
@@ -718,45 +628,6 @@ const addCriterio = (criterio) => {
     }
     return f
 };
-/* 
-const addFiltro = () => {
-    var f = { tipoFiltro: tipoFiltro.value, filtro: '' }
-
-    if (tipoFiltro.value == 'Valor') {
-        f.filtro = ''
-        if (valorMaiorque.value !== '') {
-            f.filtro = f.filtro + valorMaiorque.value + '<'
-        }
-        f.filtro = f.filtro + 'Valor'
-        if (valorMenorque.value !== '') {
-            f.filtro = f.filtro + '<' + valorMenorque.value
-        }
-
-
-    } else if (tipoFiltro.value == 'Data') {
-
-        f.filtro = ''
-        if (diaMaiorQue.value !== '') {
-            f.filtro = f.filtro + diaMaiorQue.value + '<'
-        }
-        f.filtro = f.filtro + 'Data'
-        if (diaMenorQue.value !== '') {
-            f.filtro = f.filtro + '<' + diaMenorQue.value
-        }
-
-    }
-    else if (tipoFiltro.value == 'Descrição') {
-        f.filtro = filtroDescricao.value
-    }
-    valorMenorque.value = ''
-    valorMaiorque.value = ''
-    diaMaiorQue.value = ''
-    diaMenorQue.value = ''
-    tipoFiltro.value = ''
-    filtroDescricao.value = ''
-    filtrosNovaTag.value.push(f)
-    showfiltroCategDialog.value = false
-} */
 
 const getSeverity = (filtro) => {
     console.log('filtro');
@@ -779,12 +650,4 @@ const getSeverity = (filtro) => {
             return null;
     }
 };
-/* 
-const deleteFiltro = (filtro) => {
-    const index = filtrosNovaTag.value.findIndex(obj => obj.filtro === filtro);
-    if (index > -1) {
-        filtrosNovaTag.value.splice(index, 1);
-    }
-}
- */
 </script>
