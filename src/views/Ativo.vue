@@ -6,10 +6,6 @@
                 :customUpload="true" @uploader="handleFileUpload" />
         </div>
 
-        <div>
-            <botaoteste buttonType="primary" @click="handleFileUpload"> Clieque aqui para testar</botaoteste>
-        </div>
-
         <Card>
 
             <template #title v-if="contasStore.contas[id]">
@@ -64,7 +60,14 @@
                 <Column field="categoria" header="Categoria">
                     <template #body="{ data }">
                         <TreeSelect v-model="data.categoria" @node-select="onNodeSelect(data, $event)"
-                            :options="categoriasStore.categorias" placeholder="Select Item" class="md:w-80 w-full">
+                            :options="categoriasStore.categorias" placeholder="Sem Categoria" class="md:w-80 w-full">
+                            <template #header="{ node }">
+                                <div class="px-3 pt-1 pb-2 flex justify-between">
+                                    <Button label="Sem Categoria" severity="secondary" text size="small"
+                                        icon="pi pi-minus" @click="apagaCategoria(data)" />
+                                </div>
+
+                            </template>
                             <template #option="{ node }">
                                 <div class="flex-row">
                                     <div>
@@ -76,8 +79,6 @@
                                 <div class="px-3 pt-1 pb-2 flex justify-between">
                                     <Button label="Nova Categoria" severity="secondary" text size="small"
                                         icon="pi pi-plus" @click="openNewCategoria" />
-
-
                                 </div>
                             </template>
 
@@ -85,12 +86,24 @@
 
                     </template>
                 </Column>
+
+                <Column v-if="verificouCategorias"><template #body="{ data }">
+                        <span v-if="JSON.stringify(data.categoria) === '{}'">
+
+
+                        </span>
+                        <span v-else>
+                            <i class="pi pi-check"></i>
+
+                        </span>
+                    </template>
+                </Column>
             </DataTable>
         </div>
 
         <template #footer>
-            <!--   <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogDoc" />
-            <Button label="Salvar" icon="pi pi-check" text @click="salvarDoc" /> -->
+            <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogDoc" />
+            <Button label="Salvar" icon="pi pi-check" text @click="salvarDoc" />
         </template>
     </Dialog>
 
@@ -338,6 +351,7 @@ const submitted = ref(false);
 const displayDocDialog = ref(false);
 const docDoDialog = ref({});
 
+const verificouCategorias = ref(false);
 
 const getSeverity = (filtro) => {
     console.log('filtro');
@@ -374,7 +388,7 @@ const handleFileUpload = (event) => {
 
     console.log('tableData');
     console.log(tableData.value);
-
+    verificouCategorias.value = false;
 
     submitted.value = false;
     displayDocDialog.value = true;
@@ -383,6 +397,7 @@ const handleFileUpload = (event) => {
 
 const verificaTodosOsFiltros = () => {
     console.log('verificando todos os filtros');
+    verificouCategorias.value = true;
     for (let i = 0; i < tableData.value.length; i++) {
         const transacao = tableData.value[i];
         if (transacao.descricao) {
@@ -415,6 +430,8 @@ const verificarFiltrosDaTransacao = (categorias, index) => {
             verificarFiltrosDaTransacao(categoria.children, index);
         }
     });
+    console.log('verifica se tableData.value[index].categoria tem alguma chave');
+
 };
 
 
@@ -560,11 +577,32 @@ function areObjectsEqual(obj1, obj2) {
 
     return true;
 }
+/* 
+const mapaCategorias = ref(new Map());
+
+const mapeiaCategorias = (categorias) => {
+    const map = new Map();
+    categorias.forEach(categoria => {
+        map.set(categoria.key, categoria);
+    });
+    return map;
+};
+ */
+
+
 
 const loadCategoriasEFiltros = async () => {
     console.log(userStore.user.id);
     await filtrosStore.loadFiltros(userStore.user.id);
-    await categoriasStore.loadCategories(userStore.user.id);
+    await categoriasStore.loadCategories(userStore.user.id).then(() => {
+        console.log('categorias');
+        console.log(categoriasStore.categorias);
+        /* 
+                mapaCategorias.value = mapeiaCategorias(categoriasStore.categorias);
+                console.log('mapaCategorias');
+                console.log(mapaCategorias.value); */
+    });
+
     console.log(categoriasStore.categorias);
 };
 
@@ -587,6 +625,15 @@ const openNewCategoria = () => {
 
 };
 
+const apagaCategoria = (node) => {
+    console.log('apagando');
+    console.log(node);
+    node.categoria = {};
+    node.selectedCateg = false;
+
+};
+
+
 const categdodialog = ref({ filtros: [] });
 const displaycategDialog = ref(false);
 const ehEdit = ref(false);
@@ -597,6 +644,20 @@ const showfiltroCategDialog = ref(false);
 const filtroDoDialogCateg = ref({ criteriosDoFiltro: [{}] });
 /* const submittedFiltro = ref(false); */
 
+const salvarDoc = () => {
+    var transacoes = [];
+
+    console.log('tableData');
+    console.log(tableData.value);
+    /* 
+    
+        console.log('transacoes');
+        console.log(transacoes);
+        verificouCategorias.value = false;
+        submitted.value = false;
+        displayDocDialog.value = true;
+     */
+};
 
 const addCriteriosDoFiltro = () => {
     filtroDoDialogCateg.value.criteriosDoFiltro.push({});
