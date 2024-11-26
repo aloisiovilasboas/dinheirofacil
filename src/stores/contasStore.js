@@ -18,6 +18,57 @@ export const useContasStore = defineStore("contasStore", {
     error: null, // Estado para armazenar erros
   }),
   actions: {
+    async addTransacoes(userId, contaIndex, novasTransacoes) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const docRef = doc(db, "contas", userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const existingData = docSnap.data();
+
+          // Atualiza diretamente a conta no índice especificado
+          const contasAtualizadas = [...existingData.contas];
+          if (contasAtualizadas[contaIndex]) {
+            contasAtualizadas[contaIndex] = {
+              ...contasAtualizadas[contaIndex],
+              transacoes: [
+                ...(contasAtualizadas[contaIndex].transacoes || []),
+                ...novasTransacoes,
+              ],
+            };
+
+            // Atualiza o documento no Firestore
+            await updateDoc(docRef, { contas: contasAtualizadas });
+
+            // Atualiza o estado local
+            this.contas = contasAtualizadas;
+            console.log(
+              `Transações adicionadas com sucesso à conta no índice ${contaIndex}`
+            );
+            return { success: true };
+          } else {
+            return {
+              success: false,
+              error: "Índice de conta inválido",
+            };
+          }
+        } else {
+          return {
+            success: false,
+            error: "Documento de contas não encontrado",
+          };
+        }
+      } catch (error) {
+        this.error = error.message;
+        console.error("Erro ao adicionar transações:", error);
+        return { success: false, error: error.message };
+      } finally {
+        this.loading = false;
+      }
+    },
     async loadmodelosbancos() {
       this.loading = true;
       this.error = null;
@@ -41,7 +92,79 @@ export const useContasStore = defineStore("contasStore", {
       }
     },
     // Carregar as contas de um usuário sem as transações
+    async loadConta(userId, contaIndex) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const docRef = doc(db, "contas", userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const contas = docSnap.data().contas || [];
+
+          // Verifica se o índice fornecido é válido
+          if (contaIndex >= 0 && contaIndex < contas.length) {
+            const conta = contas[contaIndex];
+            console.log(
+              `Conta carregada com sucesso no índice ${contaIndex}:`,
+              conta
+            );
+
+            // Retorna a conta especificada
+            return { success: true, data: conta };
+          } else {
+            return { success: false, error: "Índice de conta inválido" };
+          }
+        } else {
+          return {
+            success: false,
+            error: "Documento de contas não encontrado",
+          };
+        }
+      } catch (error) {
+        this.error = error.message;
+        console.error("Erro ao carregar conta:", error);
+        return { success: false, error: error.message };
+      } finally {
+        this.loading = false;
+      }
+    },
     async loadContas(userId) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const docRef = doc(db, "contas", userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const contas = docSnap.data().contas || [];
+
+          console.log(
+            `Contas carregadas com sucesso para o usuário ${userId}:`,
+            contas
+          );
+
+          // Atualiza o estado local
+          this.contas = contas;
+
+          return { success: true, data: contas };
+        } else {
+          return {
+            success: false,
+            error: "Documento de contas não encontrado",
+          };
+        }
+      } catch (error) {
+        this.error = error.message;
+        console.error("Erro ao carregar contas:", error);
+        return { success: false, error: error.message };
+      } finally {
+        this.loading = false;
+      }
+    },
+    async loadContasSemTransacoes(userId) {
       this.loading = true;
       this.error = null;
 

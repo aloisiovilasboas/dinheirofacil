@@ -20,17 +20,12 @@
             </template>
 
             <template #content>
-                <DataTable>
+                <DataTable :value="contasStore.contas[id].transacoes">
                     <Column field="data" header="Data"></Column>
                     <Column field="descricao" header="Descrição"></Column>
                     <Column field="valor" header="Valor"></Column>
-                    <Column field="saldo" header="Saldo"></Column>
                     <Column field="categoria" header="Categoria"></Column>
-                    <Column field="conta" header="Conta"></Column>
-                    <Column field="tipo" header="Tipo"></Column>
-                    <Column field="status" header="Status"></Column>
-                    <Column field="observacao" header="Observação"></Column>
-                    <Column field="actions" header="Ações"></Column>
+
                 </DataTable>
             </template>
         </Card>
@@ -103,7 +98,7 @@
 
         <template #footer>
             <Button label="Cancelar" icon="pi pi-times" text @click="hideDialogDoc" />
-            <Button label="Salvar" icon="pi pi-check" text @click="salvarDoc" />
+            <Button label="Salvar" icon="pi pi-check" text @click="salvarDoc(id)" />
         </template>
     </Dialog>
 
@@ -644,24 +639,54 @@ const showfiltroCategDialog = ref(false);
 const filtroDoDialogCateg = ref({ criteriosDoFiltro: [{}] });
 /* const submittedFiltro = ref(false); */
 
-const salvarDoc = () => {
+const salvarDoc = (id) => {
     var transacoes = [];
 
-    console.log('tableData');
+    /* console.log('tableData');
     console.log(tableData.value);
+ */
+    //Trata os dados para salvar no banco
+
+    tableData.value.forEach(transacao => {
+        if (transacao.descricao !== '' && transacao.descricao !== undefined) {
+            transacoes.push({
+                tid: Math.random().toString(16).slice(2),
+                data: transacao.date,
+                descricao: transacao.descricao,
+                valor: transacao.valor,
+                categoria: transacao.categoria,
+            });
+        }
+    });
+
+    console.log('transacoes');
+    console.log(transacoes);
+
+
+    //Salva no banco
+
+    console.log('useContasStore.addTransacoes(userStore.user.id,id,transacoes)');
+
+
+    // transforma o id em numero
+    var intid = parseInt(id);
+    contasStore.addTransacoes(userStore.user.id, intid, transacoes);
+
     /* 
-    
         console.log('transacoes');
         console.log(transacoes);
         verificouCategorias.value = false;
         submitted.value = false;
-        displayDocDialog.value = true;
+       
      */
+    displayDocDialog.value = true;
 };
 
 const addCriteriosDoFiltro = () => {
     filtroDoDialogCateg.value.criteriosDoFiltro.push({});
 };
+
+
 
 const removecriterio = (criterio) => {
     filtroDoDialogCateg.value.criteriosDoFiltro = filtroDoDialogCateg.value.criteriosDoFiltro.filter(p => p !== criterio);
@@ -839,15 +864,13 @@ function findParentNode(categorias, childKey) {
 
 
 
-const loadContasECartoes = () => {
-    contasStore.loadContas(userStore.user.id);
-    cartoesStore.loadCartoes(userStore.user.id);
-};
+
 
 onBeforeMount(() => {
     loadCategoriasEFiltros();
     loadmodelosbancos();
-    loadContasECartoes();
+    contasStore.loadContas(userStore.user.id);
+
 });
 
 const indexEditFiltro = ref({})
