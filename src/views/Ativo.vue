@@ -22,9 +22,46 @@
             <template #content>
                 <DataTable :value="contasStore.contas[id].transacoes">
                     <Column field="data" header="Data"></Column>
-                    <Column field="descricao" header="Descrição"></Column>
+                    <Column field="descricao" header="Descrição">
+                        <template #body="{ data, index }">
+                            {{ data.descricao }}
+                            <span v-if="data.selectedCateg">
+                                <Button size="small" rounded icon="pi pi-save" label="Salvar"
+                                    @click="salvarTransacao(data.categoria, id, data.tid, index, data)" />
+                            </span>
+                        </template>
+                    </Column>
                     <Column field="valor" header="Valor"></Column>
-                    <Column field="categoria" header="Categoria"></Column>
+                    <Column field="categoria" header="Categoria">
+                        <template #body="{ data }">
+                            <TreeSelect v-model="data.categoria" @node-select="onNodeSelect(data, $event)"
+                                @node-unselect="onNodeUnSelect(data, $event)" :options="categoriasStore.categorias"
+                                placeholder="Sem Categoria" class="md:w-80 w-full">
+                                <template #header="{ node }">
+                                    <div class="px-3 pt-1 pb-2 flex justify-between">
+                                        <Button label="Sem Categoria" severity="secondary" text size="small"
+                                            icon="pi pi-minus" @click="apagaCategoria(data)" />
+                                    </div>
+
+                                </template>
+                                <template #option="{ node }">
+                                    <div class="flex-row">
+                                        <div>
+                                            {{ node.label }}
+                                        </div>
+                                    </div>
+                                </template>
+                                <template #footer>
+                                    <div class="px-3 pt-1 pb-2 flex justify-between">
+                                        <Button label="Nova Categoria" severity="secondary" text size="small"
+                                            icon="pi pi-plus" @click="openNewCategoria" />
+                                    </div>
+                                </template>
+
+                            </TreeSelect>
+
+                        </template>
+                    </Column>
 
                 </DataTable>
             </template>
@@ -330,6 +367,13 @@ const onNodeSelect = (rowData, event) => {
 
 }
 
+const onNodeUnSelect = (rowData, event) => {
+    console.log('Evento node-unselect:', event); // Teste para ver o conteúdo do evento
+    console.log('rowData:', rowData); // Teste para ver o conteúdo do rowData 
+    rowData.categCompleta = { key: null }; // Armazena o nó completo em categoria
+    rowData.selectedCateg = true; // Armazena o nó completo em categoria
+
+}
 
 
 const categoriasStore = useCategoriasStore();
@@ -713,6 +757,36 @@ const addfiltro = (categoria, descricaofiltro, index) => {
     editCategoria(categoria);
     novoFiltroCateg({ nome: descricaofiltro, "criteriosDoFiltro": [{ filtroDescricao: descricaofiltro, tipoFiltro: "Descrição", label: descricaofiltro }] });
 
+};
+
+const salvarTransacao = (categoria, id, tid, index, data) => {
+    console.log('salvarTransacao');
+    /* 
+        if (categoria.key !== null) {
+            console.log('categoria');
+            console.log(categoria);
+            console.log('id');
+            console.log(id);
+            console.log('tid');
+            console.log(tid);
+            console.log('index');
+            console.log(index);
+            console.log('data');
+            console.log(data);
+     
+        } else {
+            console.log('categoria vazia');
+            console.log('data');
+            console.log(data);
+        }
+     */
+
+    /* updateCategoriaTransacao(userStore.user.id, id, tid, categoria, index); */
+
+    /*  tableData.value[index]['selectedCateg'] = false; */
+    console.log("updateCategoriaTransacao(userId,contaIndex, transacaoId,  novaCategoria )");
+    /*     console.log(userStore.user.id); */
+    contasStore.updateCategoriaTransacao(userStore.user.id, id, tid, categoria);
 };
 
 const editFiltro = (filtro, index) => {

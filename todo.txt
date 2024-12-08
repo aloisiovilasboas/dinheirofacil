@@ -1,3 +1,11 @@
+ver com calma o trato do csv e do ofx. focando no ofx
+colocar verificacao para ver se a transacao ja foi importada
+colocar tipo de importacao por tipo de banco
+tratar transacoes especiais (pagamentos de fatura por ex)
+
+
+
+
 Categorias e subcategorias 
 	Crud de Arvore de categorias DONE
 	Crud de Marcadores para aplicar categoria ou subcategoria DONE

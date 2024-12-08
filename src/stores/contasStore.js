@@ -18,6 +18,76 @@ export const useContasStore = defineStore("contasStore", {
     error: null, // Estado para armazenar erros
   }),
   actions: {
+    async updateCategoriaTransacao(
+      userId,
+      contaIndex,
+      transacaoId,
+      novaCategoria
+    ) {
+      console.log(
+        "Atualizando categoria da transação:",
+        transacaoId,
+        novaCategoria
+      );
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const docRef = doc(db, "contas", userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const existingData = docSnap.data();
+
+          // Verifica se a conta existe no índice especificado
+          const contasAtualizadas = [...existingData.contas];
+          if (contasAtualizadas[contaIndex]) {
+            const conta = contasAtualizadas[contaIndex];
+
+            // Atualiza a categoria da transação específica
+            const transacoesAtualizadas = conta.transacoes.map((transacao) => {
+              if (transacao.tid === transacaoId) {
+                console.log("Transação encontrada:", transacao);
+                return {
+                  ...transacao,
+                  categoria: novaCategoria, // Atualiza a categoria
+                };
+              }
+              return transacao;
+            });
+
+            // Atualiza as transações da conta
+            contasAtualizadas[contaIndex] = {
+              ...conta,
+              transacoes: transacoesAtualizadas,
+            };
+
+            // Atualiza o documento no Firestore
+            await updateDoc(docRef, { contas: contasAtualizadas });
+
+            // Atualiza o estado local
+            this.contas = contasAtualizadas;
+            console.log(
+              `Categoria atualizada para a transação ${transacaoId} na conta ${contaIndex}`
+            );
+            return { success: true };
+          } else {
+            return { success: false, error: "Índice de conta inválido" };
+          }
+        } else {
+          return {
+            success: false,
+            error: "Documento de contas não encontrado",
+          };
+        }
+      } catch (error) {
+        this.error = error.message;
+        console.error("Erro ao atualizar categoria da transação:", error);
+        return { success: false, error: error.message };
+      } finally {
+        this.loading = false;
+      }
+    },
     async addTransacoes(userId, contaIndex, novasTransacoes) {
       this.loading = true;
       this.error = null;
