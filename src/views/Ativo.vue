@@ -2,7 +2,7 @@
     <div style="margin-top: 100px">
 
         <div>
-            <FileUpload mode="basic" chooseLabel="Fazer upload de extrato" accept=".csv,.ofx" :auto="true"
+            <FileUpload mode="basic" chooseLabel="Fazer upload de extrato" accept=".csv,.ofx,.pdf" :auto="true"
                 :customUpload="true" @uploader="handleFileUpload" />
         </div>
 
@@ -321,7 +321,7 @@
 
 
 <script setup>
-defineProps({
+const props = defineProps({
     id: String
 })
 
@@ -354,8 +354,15 @@ const filtrosStore = useFiltrosStore();
 import { useUserStore } from '@/stores/user';
 const userStore = useUserStore();
 
+
+
 import { useCartoesStore } from '@/stores/cartoesStore';
 const cartoesStore = useCartoesStore();
+
+import * as pdfjsLib from 'pdfjs-dist';
+
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 
 const onNodeSelect = (rowData, event) => {
     /*  console.log('tempdel:', tempdel); // Teste para ver o conteúdo do evento */
@@ -423,6 +430,9 @@ const handleFileUpload = (event) => {
         handleCSVUpload(event);
     } else if (ext == 'ofx') {
         handleOFXUpload(event);
+    }
+    else if (ext == 'pdf') {
+        handlePDFUpload(event);
     }
 
     console.log('tableData');
@@ -547,7 +557,148 @@ const handleCSVUpload = (event) => {
     reader.readAsText(file);
 };
 
+const handlePDFUpload = async (event) => {
+    const file = event.files[0];
+    const reader = new FileReader();
 
+    reader.onload = async (e) => {
+        const pdfData = new Uint8Array(e.target.result);
+        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+        const pdfDoc = await loadingTask.promise;
+        const numPages = pdfDoc.numPages;
+
+        let extractedText = '';
+
+        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+            const page = await pdfDoc.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(' ');
+            extractedText += pageText + '\n';
+        }
+
+        const start = extractedText.indexOf('Detalhes da fatura');
+        const end = extractedText.indexOf('Subtotal');
+        if (start === -1 || end === -1) {
+            console.error('Seção "Detalhes da fatura" não encontrada no PDF.');
+            return;
+        }
+
+        const detailsText = extractedText.substring(start, end).trim();
+        const invoiceData = processInvoiceText(detailsText);
+        console.log('Saldo da Fatura Anterior:', invoiceData.saldoFaturaAnterior);
+        console.log('Itens da Fatura:', invoiceData.itensFatura);
+
+        tableData.value = invoiceData.itensFatura; // Preenche a tableData
+    };
+
+    reader.readAsArrayBuffer(file);
+};
+
+const processInvoiceText = (text) => {
+    const results = {
+        saldoFaturaAnterior: null,
+        itensFatura: [],
+    };
+
+    // Regex para o saldo da fatura anterior
+    const saldoAnteriorRegex = /SALDO FATURA ANTERIOR\s+BR\s+([\d,.]+)/;
+
+    // Regex para itens da fatura
+    const itensRegex = /(\d{2}\/\d{2})\s+(.+?)\s+BR\s+(-?[\d,.]+)/g;
+
+    // Extrair saldo da fatura anterior
+    const saldoMatch = text.match(saldoAnteriorRegex);
+    if (saldoMatch) {
+        const saldoValue = parseFloat(saldoMatch[1].replace(',', '.'));
+        results.saldoFaturaAnterior = saldoValue;
+        results.itensFatura.push({
+            date: '',
+            descricao: 'Saldo da Fatura Anterior',
+            valor: saldoValue,
+        });
+    }
+
+    // Extrair itens da fatura
+    let match;
+    while ((match = itensRegex.exec(text)) !== null) {
+        const [_, date, description, value] = match;
+        results.itensFatura.push({
+            date: date.trim(),
+            descricao: description.trim(),
+            valor: parseFloat(value.replace(',', '.')),
+        });
+    }
+
+    return results;
+};
+
+
+
+
+
+const handlePDFUpload2 = async (event) => {
+    const file = event.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+        const pdfData = new Uint8Array(e.target.result);
+        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+        const pdfDoc = await loadingTask.promise;
+        const numPages = pdfDoc.numPages;
+
+        let extractedText = '';
+
+        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+            const page = await pdfDoc.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(' \t ');
+            console.log('pageText');
+            console.log(textContent.items);
+            extractedText += pageText + '\n';
+        }
+
+        const start = extractedText.indexOf('Detalhes da fatura');
+        const end = extractedText.indexOf('Subtotal');
+        if (start === -1 || end === -1) {
+            console.error('Seção "Detalhes da fatura" não encontrada no PDF.');
+            return;
+        }
+
+        const detailsText = extractedText.substring(start, end).trim();
+
+
+        const lines = detailsText.split('\n').filter(line => line.trim());
+        console.log('Linhas:', lines);
+        const headers = ['date', 'descricao', 'valorbrl'];
+        console.log(headers);
+
+        const data = [];
+
+        for (let i = 1; i < lines.length; i++) { // Ignora o cabeçalho
+            const line = lines[i].trim();
+            const match = line.match(/^(\d{2}\/\d{2})\s+(.*?)\s+([\d,-]+)$/);
+            if (match) {
+                const [_, date, descricao, valorbrl] = match;
+
+                const rowData = {
+                    date: date,
+                    descricao: descricao,
+                    valorbrl: valorbrl.replace('.', ',')
+                };
+                console.log('rowData');
+                console.log(rowData);
+                data.push(rowData);
+            } else {
+                console.warn('Linha não reconhecida:', line);
+            }
+        }
+
+        tableData.value = data; // Preenche a tableData
+        console.log('Data:', data);
+    };
+
+    reader.readAsArrayBuffer(file);
+};
 
 
 

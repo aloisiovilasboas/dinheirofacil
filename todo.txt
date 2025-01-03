@@ -1,35 +1,28 @@
-ver com calma o trato do csv e do ofx. focando no ofx
+ver com calma o trato do csv, ofx e pdf. focando no ofx
+	tratar erro: adicionar sem verificar categorias dá erro
 colocar verificacao para ver se a transacao ja foi importada
 colocar tipo de importacao por tipo de banco
 tratar transacoes especiais (pagamentos de fatura por ex)
 
 
+Ativo
 
-
-Categorias e subcategorias 
-	Crud de Arvore de categorias DONE
-	Crud de Marcadores para aplicar categoria ou subcategoria DONE
-
-
-	
-	Contas e Cartoes
-	- nome
-	- lista dos documentos importados daquela conta/cartao
-	- transacoes
-
-
-	Importar documento:
-		nome documento: Ex: Visa Cartao XP Junho
-		seleciona a conta ou cartao
-		importa transacoes
-		exibe transacoes duplicadas
-		pergunta se deseja aplicar as categorias
-			se sim, exibe quantas transacoes ficaram sem categorizar pelos filtros
-
-implementar no 'admin' a possibilidade de colocar formatos dos bancos 'BB, XP' etc
+Em cada ativo, uma data inicial e final como filtro pra mostrar as transacoes daquele periodo
+além de um grafico pizza mostrando a distribuicao dos gastos por categoria
 
 Perfil
-Uma barra de ferramentas com um filtro de data inicial e final, e uma checklist de quais contas/cartoes a serem exibidos
-uma tabela com todas as transacoes importadas
+Uma barra de ferramentas com um filtro de data inicial e final, e uma checklist de quais contas/cartoes a serem exibidos e quais categorias a serem exibidas
+uma tabela com todas as transacoes importadas daquele periodo dentro dos filtros
+além de um grafico pizza mostrando a distribuicao dos gastos por categoria
 
-	adicionar filtros, a qual conta e cartao se aplica aquela categoria
+
+
+
+
+Depois:
+implementar no 'admin' a possibilidade de colocar formatos dos bancos 'BB, XP' etc
+
+adicionar filtros, a qual conta ou cartao se aplica aquela categoria
+
+prever parcelas futuras a partir do que já se sabe
+
