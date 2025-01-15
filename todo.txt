@@ -20,9 +20,14 @@ além de um grafico pizza mostrando a distribuicao dos gastos por categoria
 
 
 Depois:
+
+funcao add transacao ( na unha)
+
 implementar no 'admin' a possibilidade de colocar formatos dos bancos 'BB, XP' etc
 
 adicionar filtros, a qual conta ou cartao se aplica aquela categoria
 
 prever parcelas futuras a partir do que já se sabe
+
+funcao ocultar / apagar transacao
 

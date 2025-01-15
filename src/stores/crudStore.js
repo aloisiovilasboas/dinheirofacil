@@ -105,7 +105,45 @@ export const useCrudStore = defineStore("crudStore", {
         return { success: false, error: error.message };
       }
     },
+    //funcao backup
+    async backupAllCollections() {
+      this.loading = true;
+      this.error = null;
+      console.log("Iniciando o backup de todas as coleções");
 
+      try {
+        // Define as coleções a serem salvas
+        const collections = [
+          "categorias",
+          "contas",
+          "filtros",
+          "opcoesbancos",
+          "usuarios",
+        ];
+        const backup = {};
+
+        // Itera sobre as coleções e faz o backup de cada uma
+        for (const collectionName of collections) {
+          const querySnapshot = await getDocs(collection(db, collectionName));
+          backup[collectionName] = [];
+
+          querySnapshot.forEach((doc) => {
+            backup[collectionName].push({ id: doc.id, ...doc.data() });
+          });
+        }
+
+        console.log("Backup concluído com sucesso:", backup);
+
+        // Retorna o backup como JSON
+        return { success: true, data: backup };
+      } catch (error) {
+        this.error = error.message;
+        console.error("Erro ao fazer backup das coleções:", error);
+        return { success: false, error: error.message };
+      } finally {
+        this.loading = false;
+      }
+    },
     // Função para limpar uma coleção específica do estado
     clearCollection(collectionName) {
       if (this.collections[collectionName]) {

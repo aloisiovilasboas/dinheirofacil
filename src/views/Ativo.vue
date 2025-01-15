@@ -21,6 +21,13 @@
 
             <template #content>
                 <DataTable :value="contasStore.contas[id].transacoes">
+                    <Column>
+                        <template #body="{ data, index }">
+                            <Checkbox v-model="checkboxes" input-id="'checkbox-index" value="index" />
+
+                        </template>
+                    </Column>
+
                     <Column field="data" header="Data"></Column>
                     <Column field="descricao" header="Descrição">
                         <template #body="{ data, index }">
@@ -326,7 +333,7 @@ const props = defineProps({
 })
 
 import { onBeforeMount } from 'vue';
-
+import Checkbox from 'primevue/checkbox';
 import Card from 'primevue/card';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -360,6 +367,8 @@ import { useCartoesStore } from '@/stores/cartoesStore';
 const cartoesStore = useCartoesStore();
 
 import * as pdfjsLib from 'pdfjs-dist';
+
+const checkboxes = ref([]);
 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
@@ -611,11 +620,11 @@ const processInvoiceText = (text) => {
     if (saldoMatch) {
         const saldoValue = parseFloat(saldoMatch[1].replace(',', '.'));
         results.saldoFaturaAnterior = saldoValue;
-        results.itensFatura.push({
+        /* results.itensFatura.push({
             date: '',
             descricao: 'Saldo da Fatura Anterior',
             valor: saldoValue,
-        });
+        }); */
     }
 
     // Extrair itens da fatura

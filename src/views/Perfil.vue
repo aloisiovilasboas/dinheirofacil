@@ -8,30 +8,8 @@
             </template>
         </Card>
 
-        <div>
-            <button @click="createDocument">Criar Documento</button>
-            <button @click="readDocuments">Ler Documentos</button>
-            <button @click="updateDocument">Atualizar Documento</button>
-            <button @click="deleteDocument">Deletar Documento</button>
+        <Button icon="pi pi-trash" outlined rounded class="mr-2" severity="secondary" @click="backupBanco" />
 
-            <div v-if="data.length">
-                <h3>Documentos:</h3>
-                <ul>
-                    <li v-for="item in data" :key="item.id">{{ item }}</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="card">
-            <!-- Verifica se nodes não está vazio -->
-            <Tree v-model:selectionKeys="selectedKey" selectionMode="multiple" :value="testCategories"
-                class="w-full md:w-[30rem]"></Tree>
-        </div>
-
-        <div class="card">
-            <TreeSelect v-model="selectedValue" :options="testCategories" placeholder="Select Item"
-                class="md:w-80 w-full" />
-        </div>
     </div>
 </template>
 
@@ -39,6 +17,8 @@
 import Card from "primevue/card";
 import Tree from 'primevue/tree';
 import TreeSelect from 'primevue/treeselect';
+
+import Button from 'primevue/button';
 
 import { onMounted, ref } from "vue";
 import { useUserStore } from "../stores/user";
@@ -51,45 +31,41 @@ const nodes = ref(null);
 const selectedValue = ref(null);
 const selectedKey = ref(null);
 
-const testCategories = ref([
-    {
-        key: 1,
-        label: 'Category 1',
-        value: 'category1',
-        children: [
-            {
-                key: 2,
-                label: 'Subcategory 1.1',
-                value: 'subcategory1.1'
-            },
-            {
-                key: 3,
-                label: 'Subcategory 1.2',
-                value: 'subcategory1.2'
-            }
-        ]
-    },
-    {
-        label: 'Category 2',
-        value: 'category2',
-        key: 4,
-        children: [
-            {
-                key: 5,
-                label: 'Subcategory 2.1',
-                value: 'subcategory2.1'
-            },
-            {
-                key: 6,
-                label: 'Subcategory 2.2',
-                value: 'subcategory2.2'
-            }
-        ]
-    }
-]);
-
 
 // Funções CRUD
+const backupBanco = async () => {
+    try {
+        console.log("Iniciando o backup do banco para download");
+
+        // Faz o backup de todas as coleções
+        const result = await crudStore.backupAllCollections();
+        if (result.success) {
+            // Converte o objeto JSON em string
+            const jsonString = JSON.stringify(result.data, null, 2);
+
+            // Cria um blob a partir do JSON
+            const blob = new Blob([jsonString], { type: "application/json" });
+
+            // Cria um link para download
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `backup-${new Date().toISOString().split("T")[0]}.json`;
+
+            // Aciona o download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            console.log("Backup baixado com sucesso");
+        } else {
+            console.error("Erro ao gerar backup para download:", result.error);
+        }
+    } catch (error) {
+        console.error("Erro no processo de backup e download:", error);
+    }
+};
+
+
 const createDocument = async () => {
     const response = await crudStore.executeAction({
         collectionName: 'minha_colecao',

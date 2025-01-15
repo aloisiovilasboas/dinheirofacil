@@ -82,13 +82,13 @@ onUpdated(() => {
   links.value = [
 
     { name: "Login", path: "/Login", show: !userStore.isLogged },
-    { name: "Cadastro", path: "/Cadastro", show: !userStore.isLogged },
-    { name: "Painel", path: "/Painel", show: userStore.isapto },
+    /* { name: "Cadastro", path: "/Cadastro", show: !userStore.isLogged }, */
+    /* { name: "Painel", path: "/Painel", show: userStore.isapto }, */
     { name: "Perfil", path: "/Perfil", show: userStore.isLogged },
-    { name: "Sementes", path: "/Sementes", show: userStore.isAdmin },
+    /* { name: "Sementes", path: "/Sementes", show: userStore.isAdmin }, */
     { name: "Categorias", path: "/Categorias", show: userStore.isAdmin },
-    { name: "Contas e Cartões", path: "/ContasECartoes", show: userStore.isAdmin },
-    { name: "Produção", path: "/Producao", show: userStore.isAdmin },
+    { name: "Ativos", path: "/ContasECartoes", show: userStore.isAdmin },
+    /* { name: "Produção", path: "/Producao", show: userStore.isAdmin }, */
     { name: "Usuários", path: "/Usuarios", show: userStore.isAdmin }
 
   ]

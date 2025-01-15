@@ -370,5 +370,47 @@ export const useContasStore = defineStore("contasStore", {
         this.loading = false;
       }
     },
+    async deleteConta(userId, contaIndex) {
+      this.loading = true;
+      this.error = null;
+      console.log("Deletando conta no índice:", contaIndex); // Verificar se a função é chamada
+
+      try {
+        const docRef = doc(db, "contas", userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const existingData = docSnap.data();
+
+          // Verifica se o índice fornecido é válido
+          if (contaIndex >= 0 && contaIndex < existingData.contas.length) {
+            const updatedContas = [...existingData.contas];
+            const contaRemovida = updatedContas.splice(contaIndex, 1); // Remove a conta pelo índice
+
+            // Atualiza o documento no Firestore
+            await updateDoc(docRef, { contas: updatedContas });
+
+            // Atualiza o estado local
+            this.contas = updatedContas;
+            console.log("Conta removida com sucesso:", contaRemovida);
+
+            return { success: true };
+          } else {
+            return { success: false, error: "Índice de conta inválido" };
+          }
+        } else {
+          return {
+            success: false,
+            error: "Documento de contas não encontrado",
+          };
+        }
+      } catch (error) {
+        this.error = error.message;
+        console.error("Erro ao deletar conta:", error);
+        return { success: false, error: error.message };
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });
