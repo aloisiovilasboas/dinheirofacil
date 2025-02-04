@@ -1,5 +1,33 @@
-<template>
+<script setup>
+import { ref } from "vue";
+import { useLoadingStore } from "./stores/loading";
+import { useNavigation } from "./composables/useNavigation";
+import Drawer from "primevue/drawer";
+import Toolbar from "primevue/toolbar";
+import ProgressSpinner from "primevue/progressspinner";
+import Button from "primevue/button";
+import router from "./router";
+import { getAuth, signOut } from "@firebase/auth";
 
+// Estado e lógica modularizados
+const visibleLeft = ref(false);
+const loadingstore = useLoadingStore();
+const { links } = useNavigation();
+
+const handleSignOut = () => {
+  const auth = getAuth();
+  signOut(auth).then(() => {
+    router.push("/");
+    visibleLeft.value = false;
+  });
+};
+
+const InlineButtonClickHandler = () => {
+  visibleLeft.value = !visibleLeft.value;
+};
+</script>
+
+<template>
   <div class="cssrouterview">
     <div v-if="loadingstore.loading">
       <h3>Carregando...</h3>
@@ -18,19 +46,16 @@
       <Drawer v-model:visible="visibleLeft">
         <div class="card">
           <div class="card-container yellow-container">
-            <!-- # router link para o home com a logo -->
             <router-link to="/" @click.native="InlineButtonClickHandler">
               <Button class="p-button-text button-sidebar">
-                <!--  span abaixo com a imagem no centro -->
-                <span style="width: 100%; text-align: center"><img src="./assets/logo1.svg" height="50">
+                <span style="width: 100%; text-align: center">
+                  <img src="./assets/logo1.svg" height="50" />
                 </span>
               </Button>
             </router-link>
-            <!-- um router link para cada intem na lista de links chamada links utilizando v-for -->
-            <div v-for="link in links">
+            <div v-for="link in links" :key="link.name">
               <div v-if="link.show">
-                <router-link :key="link.name" :to="link.path" @click.native="InlineButtonClickHandler">
-                  <!-- <h2>{{ link }}</h2> -->
+                <router-link :to="link.path" @click.native="InlineButtonClickHandler">
                   <Button class="p-button-text button-sidebar">
                     <span class="p-button-label">{{ link.name }}</span>
                   </Button>
@@ -38,103 +63,12 @@
               </div>
             </div>
             <Button label="Sair" class="p-button-text button-sidebar" icon="pi pi-sign-out" @click="handleSignOut" />
-
           </div>
         </div>
       </Drawer>
     </div>
   </div>
 </template>
-
-<script setup>
-
-import { onBeforeMount, onMounted, onUpdated, ref } from "vue";
-
-import { RouterLink, RouterView } from 'vue-router'
-import router from "./router";
-
-import { getAuth, onAuthStateChanged, signOut } from "@firebase/auth";
-
-import Drawer from 'primevue/drawer';
-import Toolbar from 'primevue/toolbar';
-import ProgressSpinner from 'primevue/progressspinner';
-import Button from 'primevue/button';
-
-
-import { useLoadingStore } from "./stores/loading"
-import { useUserStore } from "./stores/user"
-import { useUsuariosStore } from "./stores/usuarios"
-import { useCategoriasStore } from "./stores/categoriasStore"
-
-
-
-
-const visibleLeft = ref(false);
-
-const userStore = useUserStore();
-const categoriasStore = useCategoriasStore();
-const usuariosStore = useUsuariosStore();
-const loadingstore = useLoadingStore();
-const links = ref([]);
-
-onUpdated(() => {
-
-  links.value = [
-
-    { name: "Login", path: "/Login", show: !userStore.isLogged },
-    /* { name: "Cadastro", path: "/Cadastro", show: !userStore.isLogged }, */
-    /* { name: "Painel", path: "/Painel", show: userStore.isapto }, */
-    { name: "Perfil", path: "/Perfil", show: userStore.isLogged },
-    /* { name: "Sementes", path: "/Sementes", show: userStore.isAdmin }, */
-    { name: "Categorias", path: "/Categorias", show: userStore.isAdmin },
-    { name: "Ativos", path: "/ContasECartoes", show: userStore.isAdmin },
-    /* { name: "Produção", path: "/Producao", show: userStore.isAdmin }, */
-    { name: "Usuários", path: "/Usuarios", show: userStore.isAdmin }
-
-  ]
-})
-
-const InlineButtonClickHandler = () => {
-  visibleLeft.value = !visibleLeft.value
-}
-
-let auth;
-
-
-
-
-
-/* onMounted( () => {
-  auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log(user);
-      //  apostasStore.fetchApostaById(user.uid)
-      // user.getIsAdmin(user.uid)
-      // user.getIsAdmin(user.uid)
-       
-      //      console.log('admin: '+usuariosStore.isAdmin);
-
-    } else {
-      isLoggedIn.value = false;
-    }
-  });
-}); */
-
-
-const handleSignOut = () => {
-  auth = getAuth();
-  signOut(auth).then(() => {
-    userStore.resetUser()
-    usuariosStore.setUsuarios([])
-    categoriasStore.saveCategories(userStore.user.id, [])
-    usuariosStore.setIsAdmin(false)
-    router.push("/");
-    visibleLeft.value = !visibleLeft.value
-  });
-};
-
-</script>
 
 <style>
 .app {
