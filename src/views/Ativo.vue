@@ -21,12 +21,7 @@
 
             <template #content>
                 <DataTable :value="contasStore.contas[id].transacoes">
-                    <Column>
-                        <template #body="{ data, index }">
-                            <Checkbox v-model="checkboxes" input-id="'checkbox-index" value="index" />
 
-                        </template>
-                    </Column>
 
                     <Column field="data" header="Data"></Column>
                     <Column field="descricao" header="Descrição">
@@ -64,9 +59,7 @@
                                             icon="pi pi-plus" @click="openNewCategoria" />
                                     </div>
                                 </template>
-
                             </TreeSelect>
-
                         </template>
                     </Column>
 
@@ -120,9 +113,7 @@
                                         icon="pi pi-plus" @click="openNewCategoria" />
                                 </div>
                             </template>
-
                         </TreeSelect>
-
                     </template>
                 </Column>
 
@@ -333,522 +324,110 @@ const props = defineProps({
 })
 
 import { onBeforeMount } from 'vue';
-import Checkbox from 'primevue/checkbox';
+
+
 import Card from 'primevue/card';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Badge from 'primevue/badge';
-import Select from 'primevue/select';
 import FileUpload from 'primevue/fileupload';
 import InputText from 'primevue/inputtext';
-import RadioButton from 'primevue/radiobutton';
-import Tree from 'primevue/tree';
-import TreeTable from 'primevue/treetable';
-
-import * as txml from 'txml';
-
-import botaoteste from '../components/botaoteste.vue';
-
 import TreeSelect from 'primevue/treeselect';
+import RadioButton from 'primevue/radiobutton';
 
-import { useCategoriasStore } from '@/stores/categoriasStore';
 
-import { useFiltrosStore } from '@/stores/filtrosStore';
-const filtrosStore = useFiltrosStore();
+import { useAtivoDados } from "../composables/useAtivoDados";
+import { useAtivoControle } from "../composables/useAtivoControle";
+import { useFilesParser } from '@/composables/useFilesParser';
+import { useFiltrosECategorias } from '@/composables/useFiltrosECategorias';
 
 import { useUserStore } from '@/stores/user';
+import { useContasStore } from '@/stores/contasStore';
+import { useCategoriasStore } from '@/stores/categoriasStore';
+
+
 const userStore = useUserStore();
-
-
-
-import { useCartoesStore } from '@/stores/cartoesStore';
-const cartoesStore = useCartoesStore();
-
-import * as pdfjsLib from 'pdfjs-dist';
-
-const checkboxes = ref([]);
-
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
-
-const onNodeSelect = (rowData, event) => {
-    /*  console.log('tempdel:', tempdel); // Teste para ver o conteúdo do evento */
-    console.log('Evento node-select:', event); // Teste para ver o conteúdo do evento
-    console.log('rowData:', rowData); // Teste para ver o conteúdo do rowData 
-
-    rowData.categCompleta = event; // Armazena o nó completo em categoria
-    rowData.selectedCateg = true; // Armazena o nó completo em categoria
-
-}
-
-const onNodeUnSelect = (rowData, event) => {
-    console.log('Evento node-unselect:', event); // Teste para ver o conteúdo do evento
-    console.log('rowData:', rowData); // Teste para ver o conteúdo do rowData 
-    rowData.categCompleta = { key: null }; // Armazena o nó completo em categoria
-    rowData.selectedCateg = true; // Armazena o nó completo em categoria
-
-}
-
-
+const contasStore = useContasStore();
 const categoriasStore = useCategoriasStore();
 
 
-import { ref } from 'vue';
+const {
+    displayDocDialog,
+    submitted,
+    onNodeSelect,
+    onNodeUnSelect,
+} = useAtivoControle();
 
-import { useContasStore } from '@/stores/contasStore';
-const contasStore = useContasStore();
 
-const tableData = ref([]);
-const submitted = ref(false);
 
-const displayDocDialog = ref(false);
-const docDoDialog = ref({});
 
-const verificouCategorias = ref(false);
+const {
+    tableData,
+    verificouCategorias,
+} = useAtivoDados(userStore,
+    contasStore, props.id);
 
-const getSeverity = (filtro) => {
-    console.log('filtro');
-    console.log(filtro.tipoFiltro);
-    switch (filtro.tipoFiltro) {
-        case 'Valor':
-            {
-                console.log('valor');
-                return 'warn';
-            }
 
-
-        case 'Descricao':
-            return 'secondary';
-
-        case 'Data':
-            return 'warn';
-
-        default:
-            return null;
-    }
-};
-
-
-const handleFileUpload = (event) => {
-    // a depender da extensao do arquivo, chama a funcao correspondente para tratar o arquivo
-    const file = event.files[0];
-    const ext = file.name.split('.').pop();
-    if (ext == 'csv') {
-        handleCSVUpload(event);
-    } else if (ext == 'ofx') {
-        handleOFXUpload(event);
-    }
-    else if (ext == 'pdf') {
-        handlePDFUpload(event);
-    }
-
-    console.log('tableData');
-    console.log(tableData.value);
-    verificouCategorias.value = false;
-
-    submitted.value = false;
-    displayDocDialog.value = true;
-
-};
-
-const verificaTodosOsFiltros = () => {
-    console.log('verificando todos os filtros');
-    verificouCategorias.value = true;
-    for (let i = 0; i < tableData.value.length; i++) {
-        const transacao = tableData.value[i];
-        if (transacao.descricao) {
-            tableData.value[i]['selectedCateg'] = false;
-            //zera as categorias
-            tableData.value[i]['categoria'] = {};
-            verificarFiltrosDaTransacao(categoriasStore.categorias, i)
-        }
-    }
-};
-
-// percorre recursivamente a arvore de categorias e verifica se algum filtro se aplica a transacao
-
-const verificarFiltrosDaTransacao = (categorias, index) => {
-    console.log('verificando filtros');
-    categorias.forEach(categoria => {
-        console.log('categoria');
-        console.log(categoria);
-        if (categoria.filtros) {
-            categoria.filtros.forEach(filtro => {
-                if (verificarFiltro(filtro, index)) {
-                    console.log('filtro aplicado');
-                    console.log(filtro);
-                    tableData.value[index]['categoria'] = { [categoria.key]: true };
-                    console.log(tableData.value[index]);
-                }
-            });
-        }
-        if (categoria.children) {
-            verificarFiltrosDaTransacao(categoria.children, index);
-        }
-    });
-    console.log('verifica se tableData.value[index].categoria tem alguma chave');
-
-};
-
-
-
-const verificarFiltro = (filtro, index) => {
-    var transacao = tableData.value[index];
-    var cabeOFiltro = true
-    filtro.criteriosDoFiltro.forEach(criterio => {
-        if (criterio.tipoFiltro == 'Valor') {
-            if (criterio.valorMaiorque) {
-                if (transacao.valor < criterio.valorMaiorque) {
-                    cabeOFiltro = false
-                }
-            }
-            if (criterio.valorMenorque) {
-                if (transacao.valor > criterio.valorMenorque) {
-                    cabeOFiltro = false
-                }
-            }
-        } else if (criterio.tipoFiltro == 'Data') {
-            if (criterio.diaMaiorQue) {
-                if (transacao.dia < criterio.diaMaiorQue) {
-                    cabeOFiltro = false
-                }
-            }
-            if (criterio.diaMenorQue) {
-                if (transacao.dia > criterio.diaMenorQue) {
-                    cabeOFiltro = false
-                }
-            }
-        } else if (criterio.tipoFiltro == 'Descrição') {
-            /* console.log('filtroDescricao');
-            console.log(criterio.filtroDescricao);
-            console.log(transacao); */
-            if (criterio.filtroDescricao) {
-                if (!transacao.descricao.includes(criterio.filtroDescricao)) {
-                    cabeOFiltro = false
-                }
-            }
-        }
-    });
-    return cabeOFiltro
-}
-
-
-
-const handleCSVUpload = (event) => {
-    console.log(event.files[0])
-
-    const file = event.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const contents = e.target.result;
-        const rows = contents.split('\r\n');
-        const headers = rows[0].split(',');
-
-        const data = [];
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i].split(',');
-            const rowData = {};
-            for (let j = 0; j < row.length; j++) {
-                const cell = row[j];
-                if (headers[j] == 'valorbrl') {
-                    rowData['valor'] = cell.replace('.', ',');
-                } else {
-                    rowData[headers[j]] = cell;
-                }
-
-            }
-            data.push(rowData);
-        }
-        tableData.value = data;
-    };
-    reader.readAsText(file);
-};
-
-const handlePDFUpload = async (event) => {
-    const file = event.files[0];
-    const reader = new FileReader();
-
-    reader.onload = async (e) => {
-        const pdfData = new Uint8Array(e.target.result);
-        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
-        const pdfDoc = await loadingTask.promise;
-        const numPages = pdfDoc.numPages;
-
-        let extractedText = '';
-
-        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-            const page = await pdfDoc.getPage(pageNum);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map(item => item.str).join(' ');
-            extractedText += pageText + '\n';
-        }
-
-        const start = extractedText.indexOf('Detalhes da fatura');
-        const end = extractedText.indexOf('Subtotal');
-        if (start === -1 || end === -1) {
-            console.error('Seção "Detalhes da fatura" não encontrada no PDF.');
-            return;
-        }
-
-        const detailsText = extractedText.substring(start, end).trim();
-        const invoiceData = processInvoiceText(detailsText);
-        console.log('Saldo da Fatura Anterior:', invoiceData.saldoFaturaAnterior);
-        console.log('Itens da Fatura:', invoiceData.itensFatura);
-
-        tableData.value = invoiceData.itensFatura; // Preenche a tableData
-    };
-
-    reader.readAsArrayBuffer(file);
-};
-
-const processInvoiceText = (text) => {
-    const results = {
-        saldoFaturaAnterior: null,
-        itensFatura: [],
-    };
-
-    // Regex para o saldo da fatura anterior
-    const saldoAnteriorRegex = /SALDO FATURA ANTERIOR\s+BR\s+([\d,.]+)/;
-
-    // Regex para itens da fatura
-    const itensRegex = /(\d{2}\/\d{2})\s+(.+?)\s+BR\s+(-?[\d,.]+)/g;
-
-    // Extrair saldo da fatura anterior
-    const saldoMatch = text.match(saldoAnteriorRegex);
-    if (saldoMatch) {
-        const saldoValue = parseFloat(saldoMatch[1].replace(',', '.'));
-        results.saldoFaturaAnterior = saldoValue;
-        /* results.itensFatura.push({
-            date: '',
-            descricao: 'Saldo da Fatura Anterior',
-            valor: saldoValue,
-        }); */
-    }
-
-    // Extrair itens da fatura
-    let match;
-    while ((match = itensRegex.exec(text)) !== null) {
-        const [_, date, description, value] = match;
-        results.itensFatura.push({
-            date: date.trim(),
-            descricao: description.trim(),
-            valor: parseFloat(value.replace(',', '.')),
-        });
-    }
-
-    return results;
-};
-
-
-
-
-
-const handlePDFUpload2 = async (event) => {
-    const file = event.files[0];
-    const reader = new FileReader();
-
-    reader.onload = async (e) => {
-        const pdfData = new Uint8Array(e.target.result);
-        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
-        const pdfDoc = await loadingTask.promise;
-        const numPages = pdfDoc.numPages;
-
-        let extractedText = '';
-
-        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-            const page = await pdfDoc.getPage(pageNum);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map(item => item.str).join(' \t ');
-            console.log('pageText');
-            console.log(textContent.items);
-            extractedText += pageText + '\n';
-        }
-
-        const start = extractedText.indexOf('Detalhes da fatura');
-        const end = extractedText.indexOf('Subtotal');
-        if (start === -1 || end === -1) {
-            console.error('Seção "Detalhes da fatura" não encontrada no PDF.');
-            return;
-        }
-
-        const detailsText = extractedText.substring(start, end).trim();
-
-
-        const lines = detailsText.split('\n').filter(line => line.trim());
-        console.log('Linhas:', lines);
-        const headers = ['date', 'descricao', 'valorbrl'];
-        console.log(headers);
-
-        const data = [];
-
-        for (let i = 1; i < lines.length; i++) { // Ignora o cabeçalho
-            const line = lines[i].trim();
-            const match = line.match(/^(\d{2}\/\d{2})\s+(.*?)\s+([\d,-]+)$/);
-            if (match) {
-                const [_, date, descricao, valorbrl] = match;
-
-                const rowData = {
-                    date: date,
-                    descricao: descricao,
-                    valorbrl: valorbrl.replace('.', ',')
-                };
-                console.log('rowData');
-                console.log(rowData);
-                data.push(rowData);
-            } else {
-                console.warn('Linha não reconhecida:', line);
-            }
-        }
-
-        tableData.value = data; // Preenche a tableData
-        console.log('Data:', data);
-    };
-
-    reader.readAsArrayBuffer(file);
-};
-
-
-
-const handleOFXUpload = (event) => {
-    // console.log(event.files[0])
-    const file = event.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const ofxString = e.target.result;
-        const objtree = txml.parse(ofxString)
-        const transacoes = objtree[1].children[1].children[0].children[2].children[2].children
-        console.log(transacoes)
-
-        /* todo */
-        //const headers = ['descricao', 'parcela', 'cidade', 'pais', 'valorusd', 'valorbrl']
-        const headers = ['date', 'descricao', 'valorbrl']
-        console.log(headers)
-        const data = [];
-        for (let i = 1; i < transacoes.length; i++) {
-
-            if (transacoes[i].tagName == 'STMTTRN') {
-                console.log(transacoes[i])
-                const rowData = {}
-
-                const date = transacoes[i].children[1].children[0]
-                rowData['ano'] = date.substring(0, 4)
-                rowData['mes'] = date.substring(4, 6)
-                rowData['dia'] = date.substring(6, 8)
-                rowData['date'] = rowData['dia'] + '/' + rowData['mes'] + '/' + rowData['ano']
-                rowData['valor'] = transacoes[i].children[2].children[0]
-                rowData['valor'] = rowData['valor'].replace('.', ',');
-                // rowData['valor'] = 'R$ ' + rowData['valor']
-                rowData['id'] = transacoes[i].children[3].children[0]
-                rowData['descricao'] = transacoes[i].children[4].children[0]
-                rowData['tipo'] = transacoes[i].children[0].children[0]
-                rowData['categoria'] = {}
-                data.push(rowData)
-            }
-        }
-        tableData.value = data;
-    };
-    reader.readAsText(file);
-};
-
-function areObjectsEqual(obj1, obj2) {
-    // Verifica se são o mesmo objeto
-    if (obj1 === obj2) return true;
-
-    // Verifica se ambos são objetos
-    if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
-        return false;
-    }
-
-    // Verifica se têm o mesmo número de chaves
-    const keys1 = Object.keys(obj1);
-    const keys2 = Object.keys(obj2);
-
-    if (keys1.length !== keys2.length) return false;
-
-    // Verifica se todas as propriedades e valores são iguais
-    for (let key of keys1) {
-        if (!keys2.includes(key) || !areObjectsEqual(obj1[key], obj2[key])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-/* 
-const mapaCategorias = ref(new Map());
-
-const mapeiaCategorias = (categorias) => {
-    const map = new Map();
-    categorias.forEach(categoria => {
-        map.set(categoria.key, categoria);
-    });
-    return map;
-};
- */
-
-
-
-const loadCategoriasEFiltros = async () => {
-    console.log(userStore.user.id);
-    await filtrosStore.loadFiltros(userStore.user.id);
-    await categoriasStore.loadCategories(userStore.user.id).then(() => {
-        console.log('categorias');
-        console.log(categoriasStore.categorias);
-        /* 
-                mapaCategorias.value = mapeiaCategorias(categoriasStore.categorias);
-                console.log('mapaCategorias');
-                console.log(mapaCategorias.value); */
-    });
-
-    console.log(categoriasStore.categorias);
-};
-
-
-
-const loadmodelosbancos = () => {
+onBeforeMount(() => {
+    contasStore.loadContas(userStore.user.id);
     contasStore.loadmodelosbancos();
-};
+
+    categoriasStore.loadCategories(userStore.user.id);
+});
 
 
-const openNewCategoria = () => {
-
-    ehEdit.value = false;
-    categdodialog.value = {};
-    filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] };
-    selectedParentCategoryKey.value = null;
-    submitted.value = false;
-    displaycategDialog.value = true;
-    filtrosNovaTag.value = []
-
-};
-
-const apagaCategoria = (node) => {
-    console.log('apagando');
-    console.log(node);
-    node.categoria = {};
-    node.selectedCateg = false;
-
-};
+const {
+    deleteCategoriaDialog,
+    showfiltroCategDialog,
+    displayfiltrosDialog,
+    ehEditFiltro,
+    ehEdit,
+    displaycategDialog,
+    filtrosNovaTag,
+    categdodialog,
+    selectedParentCategoryKey,
+    filtroDoDialogCateg,
 
 
-const categdodialog = ref({ filtros: [] });
-const displaycategDialog = ref(false);
-const ehEdit = ref(false);
-const selectedParentCategoryKey = ref(null);
-const deleteCategoriaDialog = ref(false);
-const filtrosNovaTag = ref([]);
-const showfiltroCategDialog = ref(false);
-const filtroDoDialogCateg = ref({ criteriosDoFiltro: [{}] });
-/* const submittedFiltro = ref(false); */
+    openNewCategoria,
+    salvarCriterios,
+    apagaCategoria,
+    addCriteriosDoFiltro,
+    novoFiltroCateg,
+    removecriterio,
+    removeFiltro,
+    addfiltro,
+    salvarTransacao,
+    editFiltro,
+    hideDialogCateg,
+    salvarCateg,
+    removeCategory,
+    editCategoria,
+
+} = useFiltrosECategorias(
+    submitted,
+    tableData,
+    categoriasStore,
+    contasStore
+);
+
+const {
+    handleFileUpload,
+    verificaTodosOsFiltros,
+} = useFilesParser(
+    tableData,
+    submitted,
+    displayDocDialog,
+    verificouCategorias
+);
+
+
 
 const salvarDoc = (id) => {
     var transacoes = [];
 
-    /* console.log('tableData');
-    console.log(tableData.value);
- */
     //Trata os dados para salvar no banco
 
     tableData.value.forEach(transacao => {
@@ -875,317 +454,8 @@ const salvarDoc = (id) => {
     // transforma o id em numero
     var intid = parseInt(id);
     contasStore.addTransacoes(userStore.user.id, intid, transacoes);
-
-    /* 
-        console.log('transacoes');
-        console.log(transacoes);
-        verificouCategorias.value = false;
-        submitted.value = false;
-       
-     */
     displayDocDialog.value = true;
 };
-
-const addCriteriosDoFiltro = () => {
-    filtroDoDialogCateg.value.criteriosDoFiltro.push({});
-};
-
-
-
-const removecriterio = (criterio) => {
-    filtroDoDialogCateg.value.criteriosDoFiltro = filtroDoDialogCateg.value.criteriosDoFiltro.filter(p => p !== criterio);
-};
-
-const removeFiltro = (filtro) => {
-    filtrosNovaTag.value = filtrosNovaTag.value.filter(p => p !== filtro);
-};
-
-
-const displayfiltrosDialog = ref(false);
-
-const ehEditFiltro = ref(false);
-
-
-const addfiltro = (categoria, descricaofiltro, index) => {
-    /* { "nome": "Cassi", "criteriosDoFiltro": [ { "filtroDescricao": "Cassi", "tipoFiltro": "Descrição", "label": "Cassi" } ] } */
-
-    /*  encontraCategoriaPeloKey 
-     console.log('addfiltro'); */
-    console.log('index');
-    console.log(index);
-    tableData.value[index]['selectedCateg'] = false;
-    editCategoria(categoria);
-    novoFiltroCateg({ nome: descricaofiltro, "criteriosDoFiltro": [{ filtroDescricao: descricaofiltro, tipoFiltro: "Descrição", label: descricaofiltro }] });
-
-};
-
-const salvarTransacao = (categoria, id, tid, index, data) => {
-    console.log('salvarTransacao');
-    /* 
-        if (categoria.key !== null) {
-            console.log('categoria');
-            console.log(categoria);
-            console.log('id');
-            console.log(id);
-            console.log('tid');
-            console.log(tid);
-            console.log('index');
-            console.log(index);
-            console.log('data');
-            console.log(data);
-     
-        } else {
-            console.log('categoria vazia');
-            console.log('data');
-            console.log(data);
-        }
-     */
-
-    /* updateCategoriaTransacao(userStore.user.id, id, tid, categoria, index); */
-
-    /*  tableData.value[index]['selectedCateg'] = false; */
-    console.log("updateCategoriaTransacao(userId,contaIndex, transacaoId,  novaCategoria )");
-    /*     console.log(userStore.user.id); */
-    contasStore.updateCategoriaTransacao(userStore.user.id, id, tid, categoria);
-};
-
-const editFiltro = (filtro, index) => {
-    indexEditFiltro.value = index
-    ehEditFiltro.value = true;
-    filtroDoDialogCateg.value = { ...filtro };
-    showfiltroCategDialog.value = true;
-};
-
-const novoFiltroCateg = (novoFiltro) => {
-    console.log('novoFiltro');
-    console.log(novoFiltro);
-    ehEditFiltro.value = false;
-    if (novoFiltro) {
-        filtroDoDialogCateg.value = { ...novoFiltro };
-    } else {
-        filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] };
-    }
-    showfiltroCategDialog.value = true;
-};
-
-const editCategoria = (categoria) => {
-
-    const pai = findParentNode(categoriasStore.categorias, categoria.key);
-    ehEdit.value = true;
-    categdodialog.value = { ...categoria };
-    filtrosNovaTag.value = categoria.filtros;
-
-    displaycategDialog.value = true;
-
-    if (pai) {
-        selectedParentCategoryKey.value = { [pai.key]: true };
-    } else {
-        selectedParentCategoryKey.value = null;
-    }
-
-    console.log(selectedParentCategoryKey.value);
-
-
-};
-
-const confirmDeleteCateg = (categoria) => {
-    categdodialog.value = { ...categoria };
-    deleteCategoriaDialog.value = true;
-};
-
-const categValida = () => {
-    if (selectedParentCategoryKey.value !== null) {
-        console.log(selectedParentCategoryKey.value);
-    }
-
-    return categdodialog.value.label;
-};
-
-const hideDialogCateg = () => {
-
-    displaycategDialog.value = false;
-    submitted.value = false;
-    categdodialog.value = {};
-    selectedParentCategoryKey.value = null;
-    ehEdit.value = false;
-    displayfiltrosDialog.value = false;
-    filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] };
-    submitted.value = false;
-    filtrosNovaTag.value = []
-
-    filtrosNovaTag.value = []
-
-};
-
-
-const salvarCateg = () => {
-    submitted.value = true;
-    if (categValida()) {
-        if (ehEdit.value) {
-            console.log('editando');
-            console.log(categdodialog.value);
-            let newCategory = { key: categdodialog.value.key, label: categdodialog.value.label, value: categdodialog.value.label, filtros: filtrosNovaTag.value };
-            categoriasStore.updateCategory(userStore.user.id, newCategory);
-        } else {
-
-            console.log('salvando');
-            let parentKey = selectedParentCategoryKey.value ? Object.keys(selectedParentCategoryKey.value)[0] : null;
-            let newCategory = {
-                key: Date.now(), label: categdodialog.value.label, value: categdodialog.value.label
-                , filtros: filtrosNovaTag.value
-            };
-            categoriasStore.addCategory(userStore.user.id, newCategory, parentKey);
-        }
-
-        displaycategDialog.value = false;
-        categdodialog.value = {};
-        selectedParentCategoryKey.value = null;
-        submitted.value = false;
-        ehEdit.value = false;
-        filtrosNovaTag.value = []
-
-    } else {
-        console.log('erro');
-    }
-
-    // salva novaespec no banco e fecha o dialog
-
-
-};
-const encontraCategoriaPeloKey = (categorias, key) => {
-    for (const categoria of categorias) {
-        // transforma para string para comparar
-        let catstring = categoria.key.toString();
-        let keystring = key.toString();
-        if (catstring === keystring) {
-            return categoria;
-        } else if (categoria.children) {
-            const found = encontraCategoriaPeloKey(categoria.children, key);
-            if (found) return found;
-        }
-    }
-    return null;
-};
-
-const removeCategory = async (node) => {
-    console.log('removendo');
-    console.log(node.key);
-    await categoriasStore.deleteCategory(userStore.user.id, node.key);
-    deleteCategoriaDialog.value = false;
-
-};
-
-function findParentNode(categorias, childKey) {
-
-    for (const category of categorias) {
-        // Verifica se o nó atual possui filhos
-        if (category.children) {
-            // Percorre os filhos e verifica se algum possui a key fornecida
-            for (const child of category.children) {
-                if (child.key === childKey) {
-                    return category; // Retorna o nó pai
-                }
-            }
-            // Realiza a busca recursiva nos filhos
-            const foundParent = findParentNode(category.children, childKey);
-            if (foundParent) {
-                return foundParent;
-            }
-        }
-    }
-    return null; // Retorna null se o nó pai não for encontrado
-}
-
-
-
-
-
-onBeforeMount(() => {
-    loadCategoriasEFiltros();
-    loadmodelosbancos();
-    contasStore.loadContas(userStore.user.id);
-
-});
-
-const indexEditFiltro = ref({})
-
-
-const salvarCriterios = () => {
-    if (ehEditFiltro.value) {
-        var filtroeditado = trataCriterios()
-        filtrosNovaTag.value[indexEditFiltro.value] = filtroeditado
-    } else {
-        var novoFiltro = trataCriterios()
-        filtrosNovaTag.value.push(novoFiltro)
-    }
-    showfiltroCategDialog.value = false
-    filtroDoDialogCateg.value = { criteriosDoFiltro: [{}] }
-};
-
-
-const trataCriterios = () => {
-    console.log(filtroDoDialogCateg.value.criteriosDoFiltro);
-    var novoFiltro = { nome: filtroDoDialogCateg.value.nome, criteriosDoFiltro: [] }
-    filtroDoDialogCateg.value.criteriosDoFiltro.forEach(criterio => {
-        novoFiltro.criteriosDoFiltro.push(trataCriterio(criterio))
-    });
-    return novoFiltro
-};
-
-const trataCriterio = (criterio) => {
-    var f = { tipoFiltro: criterio.tipoFiltro, label: '' }
-
-    if (criterio.tipoFiltro == 'Valor') {
-        f.label = ''
-        if (criterio.valorMaiorque !== '' && criterio.valorMaiorque !== undefined) {
-            f.label = f.label + criterio.valorMaiorque + '<'
-            f.valorMaiorque = criterio.valorMaiorque
-        }
-        f.label = f.label + 'Valor'
-        if (criterio.valorMenorque !== '' && criterio.valorMenorque !== undefined) {
-            f.label = f.label + '<' + criterio.valorMenorque
-            f.valorMenorque = criterio.valorMenorque
-        }
-
-
-    } else if (criterio.tipoFiltro == 'Data') {
-
-        f.label = ''
-        if (criterio.diaMaiorQue !== '' && criterio.diaMaiorQue !== undefined) {
-            f.label = f.label + criterio.diaMaiorQue + '<'
-            f.diaMaiorQue = criterio.diaMaiorQue
-        }
-        f.label = f.label + 'Data'
-        if (criterio.diaMenorQue !== '' && criterio.diaMenorQue !== undefined) {
-            f.label = f.label + '<' + criterio.diaMenorQue
-            f.diaMenorQue = criterio.diaMenorQue
-        }
-
-    }
-    else if (criterio.tipoFiltro == 'Descrição') {
-        if (criterio.filtroDescricao !== '' && criterio.filtroDescricao !== undefined) {
-            f.label = criterio.filtroDescricao
-            f.filtroDescricao = criterio.filtroDescricao
-        }
-
-    }
-    return f
-};
-
-
-
-
-
-
-
-
-onBeforeMount(() => {
-    contasStore.loadContas(userStore.user.id);
-    loadmodelosbancos();
-    loadCategoriasEFiltros();
-});
-
-
 
 
 

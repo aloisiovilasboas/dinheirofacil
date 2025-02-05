@@ -196,7 +196,7 @@ import Select from 'primevue/select';
 import Column from 'primevue/column';
 import DatePicker from 'primevue/datepicker';
 import { useContasStore } from '@/stores/contasStore';
-import { useCartoesStore } from '@/stores/cartoesStore';
+/* import { useCartoesStore } from '@/stores/cartoesStore'; */
 import { useUserStore } from "@/stores/user";
 
 import FileUpload from 'primevue/fileupload';
@@ -211,16 +211,12 @@ import router from "../router";
 const tipos = ref(['Conta Corrente', 'Poupança', 'Investimento', 'Cartão de Crédito', 'Outros']);
 
 const contasStore = useContasStore();
-const cartoesStore = useCartoesStore();
-
 const userStore = useUserStore();
 
 const ehEdit = ref({ 'value': false, 'index': null });
 
 const displayContaDialog = ref(false);
-const displayCartaoDialog = ref(false);
 const contaDoDialog = ref({});
-const cartaoDoDialog = ref({});
 const submitted = ref(false);
 
 const abretransacoes = (node) => {
@@ -233,7 +229,6 @@ const abretransacoes = (node) => {
 
 const loadContasECartoes = () => {
     contasStore.loadContas(userStore.user.id);
-    cartoesStore.loadCartoes(userStore.user.id);
 };
 
 const loadmodelosbancos = () => {
@@ -310,65 +305,6 @@ const salvarConta = () => {
 const hideDialogConta = () => {
     displayContaDialog.value = false;
     contaDoDialog.value = {};
-    ehEdit.value = false;
-};
-
-// Handlers for Cartoes
-
-const openNewCartao = () => {
-    ehEdit.value = { 'value': false, 'index': null };
-    cartaoDoDialog.value = {};
-    submitted.value = false;
-    displayCartaoDialog.value = true;
-};
-
-const editCartao = (node) => {
-    console.log('editCartao', node);
-    ehEdit.value = { 'value': true, 'index': node.index };
-    submitted.value = false;
-    cartaoDoDialog.value = { ...node.data };
-    displayCartaoDialog.value = true;
-};
-
-const deleteCartaoDialog = ref(false);
-
-const delCartaoIndex = ref(null);
-
-const confirmDeleteCartao = (node) => {
-    console.log('delcartao', node.data.nome, node.index);
-    delCartaoIndex.value = node.index;
-    cartaoDoDialog.value = { ...node.data };
-    deleteCartaoDialog.value = true;
-};
-
-const removeCartao = async (node) => {
-    console.log('removendo');
-    console.log(node);
-    await cartoesStore.deleteCartao(userStore.user.id, delCartaoIndex.value);
-    deleteCartaoDialog.value = false;
-
-};
-
-const salvarCartao = () => {
-    submitted.value = true;
-    if (cartaoDoDialog.value.nome) {
-        if (ehEdit.value.value) {
-            console.log('editando', cartaoDoDialog.value);
-            cartoesStore.updateCartao(useUserStore().user.id, cartaoDoDialog.value, ehEdit.value.index);
-        } else {
-            console.log('cartaoDoDialog.value', cartaoDoDialog.value);
-            console.log('userStore.user.uid', userStore.user.id);
-            cartoesStore.addCartao(useUserStore().user.id, cartaoDoDialog.value);
-        }
-        displayCartaoDialog.value = false;
-        cartaoDoDialog.value = {};
-        ehEdit.value = false;
-    }
-};
-
-const hideDialogCartao = () => {
-    displayCartaoDialog.value = false;
-    cartaoDoDialog.value = {};
     ehEdit.value = false;
 };
 

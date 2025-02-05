@@ -46,7 +46,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 
-import { useSementesStore } from '../stores/sementes';
+
 import { useUsuariosStore } from '../stores/usuarios';
 
 
@@ -56,16 +56,16 @@ import { onBeforeMount, onUpdated } from 'vue';
 import Checkbox from 'primevue/checkbox';
 
 
-const sementesStore = useSementesStore();
+
 const usuariosStore = useUsuariosStore();
 
 onBeforeMount(() => {
-  sementesStore.fetchSementes();
+
   usuariosStore.fetchUsuarios();
 });
 
 onUpdated(() => {
-  sementesStore.fetchSementes();
+
   usuariosStore.fetchUsuarios();
 });
 

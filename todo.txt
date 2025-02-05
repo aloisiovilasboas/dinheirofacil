@@ -1,3 +1,10 @@
+terminar de arrumar o useFiltrosECategorias
+alinhar com o Categorias.vue
+terminar de arrumar o Ativo.vue
+
+resolver bug da sidebar no Ativo.vue
+
+
 ver com calma o trato do csv, ofx e pdf. focando no ofx
 	tratar erro: adicionar sem verificar categorias dá erro
 colocar verificacao para ver se a transacao ja foi importada

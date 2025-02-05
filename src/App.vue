@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useLoadingStore } from "./stores/loading";
 import { useNavigation } from "./composables/useNavigation";
 import Drawer from "primevue/drawer";
@@ -10,9 +10,15 @@ import router from "./router";
 import { getAuth, signOut } from "@firebase/auth";
 
 // Estado e lógica modularizados
-const visibleLeft = ref(false);
+
 const loadingstore = useLoadingStore();
 const { links } = useNavigation();
+
+const visibleLeft = ref(false);
+
+onMounted(() => {
+  visibleLeft.value = false; // Garante que a Drawer está fechada ao carregar
+});
 
 const handleSignOut = () => {
   const auth = getAuth();
@@ -43,10 +49,11 @@ const InlineButtonClickHandler = () => {
       </template>
     </Toolbar>
     <div class="card">
-      <Drawer v-model:visible="visibleLeft">
+      <Drawer :visible="visibleLeft" @update:visible="visibleLeft = $event">
+
         <div class="card">
           <div class="card-container yellow-container">
-            <router-link to="/" @click.native="InlineButtonClickHandler">
+            <router-link to="/" @click="InlineButtonClickHandler">
               <Button class="p-button-text button-sidebar">
                 <span style="width: 100%; text-align: center">
                   <img src="./assets/logo1.svg" height="50" />
@@ -55,7 +62,7 @@ const InlineButtonClickHandler = () => {
             </router-link>
             <div v-for="link in links" :key="link.name">
               <div v-if="link.show">
-                <router-link :to="link.path" @click.native="InlineButtonClickHandler">
+                <router-link :to="link.path" @click="InlineButtonClickHandler">
                   <Button class="p-button-text button-sidebar">
                     <span class="p-button-label">{{ link.name }}</span>
                   </Button>
